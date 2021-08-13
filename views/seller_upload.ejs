@@ -1,0 +1,67 @@
+<h1 class="mt-4">Seller Upload</h1>
+<% if(user) { %>
+    <p class="lead mb-3">
+        Welcome to Seller's Upload, <%= user.firstName + " " + user.lastName%>!
+    </p>
+    <form action="/sellers/upload" method="POST" enctype="multipart/form-data">
+        <div class="custom-file mb-3">
+            <label for="file" class="custom-file-label"> Choose Cover Photo:</label>
+            <input type="file" name="coverImg" id="file" class="custom-file-input" />
+        </div>
+        <div class="custom-file mb-3">
+            <label for="file" class="custom-file-label"> Choose Photo 1:</label>
+            <input type="file" name="img1" id="file" class="custom-file-input" />
+        </div>
+        <div class="custom-file mb-3">
+            <label for="file" class="custom-file-label"> Choose Photo 2:</label>
+            <input type="file" name="img2" id="file" class="custom-file-input" />
+        </div>
+        <div class="custom-file mb-3">
+            <label for="file" class="custom-file-label"> Choose Photo 3:</label>
+            <input type="file" name="img3" id="file" class="custom-file-input" />
+        </div>
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" class="form-control" placeholder="Enter Title" />
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="text" id="price" name="price" class="form-control" placeholder="Enter Price" />
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" id="description" name="description" class="form-control"
+                placeholder="Enter Description" />
+        </div>
+        <div class="form-group">
+            <label for="categories">Categories: </label>
+            <select name="categories" id="categories" class="form-control">
+                <option value="none" selected disabled hidden>
+                    Select a Categories
+                </option>
+                <option value="Art">Art</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="language">Language: </label>
+            <select name="language" id="language" class="form-control">
+                <option value="none" selected disabled hidden>
+                    Select a Language
+                </option>
+                <option value="Chinese">Chinese</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="year">Year Published: </label>
+            <input type="text" id="year" name="year" class="form-control" placeholder="Enter Year Published" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+            Upload
+        </button>
+    </form>
+    <a href="/sellers/dashboard" class="btn btn-secondary">Dashboard</a>
+    <a href="/forums" class="btn btn-secondary">Forum</a>
+    <a href="/users/logout" class="btn btn-secondary">Logout</a>
+
+
+    <% }%>

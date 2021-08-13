@@ -1,0 +1,34 @@
+<h1 class="mt-4">Seller Dashboard</h1>
+<% if(user) { %>
+    <p class="lead mb-3">Welcome to Seller's Dashboard, <%= user.firstName + " " + user.lastName%>!</p>
+
+<%for(let i=0; i<books.length ; i++ ){%>
+
+
+    <div style="width: 200px; height: 250px;background-color: burlywood;">
+        <%if(files[i]){%>
+
+            <div class="card card-body mb-3">
+                <%if(files[i][0].isImage){%>
+                    <img style="width: 100px; height: 100px;" src="../image/<%= files[i][0].filename %>" alt="">
+                <%}else{%>
+                    <%= files[i][0].filename%>
+                <%}%>
+                                <!-- <form  method="POST" action="/files/<%= files[i][0]._id %>?_method=DELETE">
+                <button class="btn btn-danger btn-block mt-4">Delete</button>
+            </form> -->
+            </div>
+
+        <%} else {%>
+            <p> No files to show</p>
+        <%}%>
+        <p>
+        <%= books[i].bookTitle %>
+        </p>
+    </div>
+<%}%>
+
+<a href="/sellers/upload" class="btn btn-secondary">Upload</a>
+<a href="/forums" class="btn btn-secondary">Forum</a>
+<a href="/users/logout" class="btn btn-secondary">Logout</a>
+<% }%>
