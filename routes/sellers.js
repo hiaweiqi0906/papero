@@ -61,7 +61,7 @@ router.use(methodOverride('_method'))
  */
 router.get("/login", (req, res) => {
     if (req.user) {
-        res.render('seller_dashboard')
+        res.render('sellers/seller_dashboard')
     } else {
         res.redirect("/users/login");
     }
@@ -81,31 +81,37 @@ router.get("/dashboard", ensureAuthenticated, async (req, res) => {
     //   })
 
     let files2 = [];
-    if (books.length === 0) res.render("seller_dashboard", { user: req.user, books: books, files: files2 });
+    if (books.length === 0) res.render("sellers/seller_dashboard", { user: req.user, books: books, files: files2 });
 
     //parts to loop to get cover img for each book
     for (let i = 0; i < books.length; i++) {
 
-        gfs.files.find({ filename: books[i].coverImgUri }).toArray((err, files) => {
-            if (!files || files.length === 0) {
-                files = false;
-            } else {
-                files.map((file) => {
-                    if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
-                        file.isImage = true
-                    } else {
-                        file.isImage = false
+        conn.db.collection("book-img.files").findOne({ _id: new mongoose.Types.ObjectId(books[i].coverImgUri) }, function (err, file) {
+            if (!file) file = false
+            else {
+                if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
+                    file.isImage = true
+                } else {
+                    file.isImage = false
+                }
+            }
+            files2.push(file)
+            while(files2.length === 0){
+                conn.db.collection("book-img.files").findOne({ _id: new mongoose.Types.ObjectId(books[i].coverImgUri) }, function (err, file) {
+                    if (!file) file = false
+                    else {
+                        if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
+                            file.isImage = true
+                        } else {
+                            file.isImage = false
+                        }
                     }
-
-                })
+                    files2.push(file)})
             }
-
-            files2[i] = (files)
-
             if ((i + 1) === books.length) {
-                res.render("seller_dashboard", { user: req.user, books: books, files: files2 });
+                res.render("sellers/seller_dashboard", { user: req.user, books: books, files: files2 });
             }
-        })
+        });
     }
 });
 
@@ -114,7 +120,7 @@ router.get("/dashboard", ensureAuthenticated, async (req, res) => {
  * desc: to allow user to upload
  */
 router.get("/upload", ensureAuthenticated, (req, res) => {
-    res.render("seller_upload", { user: req.user });
+    res.render("sellers/seller_upload", { user: req.user });
 });
 
 /**
@@ -130,15 +136,30 @@ router.post('/upload', upload.fields([{ //upload pic to db
 }, {
     name: 'img3', maxCount: 1
 }]), (req, res) => {
+
+    let imgID = []
+    if (req.files.coverImg) {
+        imgID.push(req.files.coverImg[0].id);
+    }
+    if (req.files.img1) {
+        imgID.push(req.files.img1[0].id);
+    }
+    if (req.files.img2) {
+        imgID.push(req.files.img2[0].id);
+    }
+    if (req.files.img3) {
+        imgID.push(req.files.img3[0].id);
+    }
     //check all info entered
-    const coverImage = imageName.shift()
+    const coverImage = imgID.shift()
+
 
     //put photo uri to book instance
     //put all info to books collection
     const newBook = new Book({
         bookTitle: req.body.title,
         coverImgUri: coverImage,
-        imageUri: imageName,
+        imageUri: imgID,
         price: req.body.price,
         description: req.body.description,
         category: req.body.categories,
@@ -148,10 +169,17 @@ router.post('/upload', upload.fields([{ //upload pic to db
         isbn: 0,
         coverType: '',
         year: req.body.year,
-        quantity: 1
+        quantity: 1,
+        states: req.body.states,
+        location: req.body.location,
+        contactNumber: req.body.noTel,
+        whatsappLink: req.body.whatsappLink,
+        messengerLink: req.body.messengerLink,
+        wechatLink: req.body.wechatLink,
+        instagramLink: req.body.instagramLink,
     })
     newBook.save()
-        .then() //(book) => console.log(book)
+        .then()
         .catch((err) => console.log(err))
     res.redirect('/sellers/dashboard')
 })
@@ -164,12 +192,116 @@ router.post('/upload', upload.fields([{ //upload pic to db
  */
 router.get("/register", (req, res) => {
     if (req.user) {
-        res.render('seller_dashboard')
+        res.render('sellers/seller_dashboard')
     } else {
         res.redirect("/users/register");
     }
 });
 
+router.post('/edit/:bookID', upload.fields([{ //upload pic to db
+    name: 'coverImg', maxCount: 1
+}, {
+    name: 'img1', maxCount: 1
+}, {
+    name: 'img2', maxCount: 1
+}, {
+    name: 'img3', maxCount: 1
+}]), (req, res) => {
 
+    Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, (err, book) => {
+
+        if (err) console.log(err);
+        let removeId = []
+        let imgID = []
+        if (req.files.coverImg) {
+            imgID.push(req.files.coverImg[0].id);
+            removeId.push(new mongoose.Types.ObjectId(book.coverImgUri));
+        } else {
+            imgID.push(book.coverImgUri);
+        }
+
+        if (req.files.img1) {
+            imgID.push(req.files.img1[0].id);
+            if (book.imageUri[0]) removeId.push(book.imageUri[0]);
+        } else {
+            if (book.imageUri[0]) imgID.push(book.imageUri[0]);
+        }
+
+        if (req.files.img2) {
+            imgID.push(req.files.img2[0].id);
+            if (book.imageUri[1]) removeId.push(book.imageUri[1]);
+        } else {
+            if (book.imageUri[1]) imgID.push(book.imageUri[1]);
+        }
+
+        if (req.files.img3) {
+            imgID.push(req.files.img3[0].id);
+            if (book.imageUri[2]) removeId.push(book.imageUri[2]);
+        } else {
+            if (book.imageUri[2]) imgID.push(book.imageUri[2]);
+        }
+        gfs.files.deleteMany({ _id: { $in: removeId } })
+        
+        //check all info entered
+        const coverImage = imgID.shift()
+        Book.updateOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) },
+            {
+                bookTitle: req.body.title,
+                coverImgUri: coverImage,
+                imageUri: imgID,
+                price: req.body.price,
+                description: req.body.description,
+                category: req.body.categories,
+                uploadedBy: req.user.email,
+                publishingCompany: '',
+                language: req.body.language,
+                isbn: 0,
+                coverType: '',
+                year: req.body.year,
+                quantity: 1,
+                states: req.body.states,
+                location: req.body.location,
+                contactNumber: req.body.noTel,
+                whatsappLink: req.body.whatsappLink,
+                messengerLink: req.body.messengerLink,
+                wechatLink: req.body.wechatLink,
+                instagramLink: req.body.instagramLink,
+            }, function (err, docs) {
+                if (err) {
+                    console.log(err)
+                }
+                else {
+                    res.redirect('/sellers/dashboard')
+                }
+            });
+    })
+})
+
+router.get('/edit/:bookID', (req, res) => {
+    Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, async (err, book) => {
+        if (err) console.log(err);
+        let allid = [ new mongoose.Types.ObjectId(book.coverImgUri) ]
+        for( let i=0; i<book.imageUri.length; i++) {
+            allid.push(book.imageUri[i])
+        }
+
+        conn.db.collection("book-img.files").find({ _id: { $in: allid } }).toArray((err, files) => {
+            if (!files || files.length === 0) {
+                res.render("sellers/seller_edit", { user: req.user, books: book, files: false });
+            } else {
+              files.map((file) => {
+                if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
+                  file.isImage = true
+                } else {
+                  file.isImage = false
+                }
+              })
+              res.render("sellers/seller_edit", { user: req.user, books: book, files: files });
+            }
+          })
+        let files = []
+        
+    })
+})
 
 module.exports = router;

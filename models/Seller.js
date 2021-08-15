@@ -22,16 +22,14 @@ const SellerSchema= mongoose.Schema({
     password:{
         type: String,
         require: true
-    }  ,
+    },
     gender:{
         type: String,
         require: true
     },
-    date_of_birth:{
-        type: Date,
-        require: true,
-        default: Date.now
-        
+    noTel:{
+        type: Long,
+        require: true,        
     },
     states:{
         type: String,

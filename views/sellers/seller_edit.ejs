@@ -1,0 +1,165 @@
+<h1 class="mt-4">Seller Upload</h1>
+<% if(user) { %>
+    <p class="lead mb-3">
+        Welcome to Seller's Edit Page, <%= user.firstName + " " + user.lastName%>!
+    </p>
+    <a href="/sellers/dashboard" class="btn btn-secondary">Dashboard</a>
+    <a href="/forums" class="btn btn-secondary">Forum</a>
+    <a href="/users/logout" class="btn btn-secondary">Logout</a>
+    <form action="/sellers/edit/<%= books._id %>" method="POST" enctype="multipart/form-data">
+        <div class="custom-file mb-3">
+            <label for="file" class="custom-file-label"> Choose Cover Photo:</label>
+            <!-- Here -->
+            <img style="width: 100px; height: 100px;" src="../../image/<%= files[0]._id %>" alt="">
+            <input type="file" name="coverImg" id="coverImg" class="custom-file-input" onchange="showPreviewCoverImage(event);" />
+        </div>
+
+        <%for(var i=1; i<4; i++){%>
+            <%if(files[i]){%>
+                <div class="custom-file mb-3">
+                    <label for="file" class="custom-file-label"> Choose Photo <%=(i)%>:</label>
+                    <!-- Here -->
+                    
+                    <img style="width: 100px; height: 100px;" src="../../image/<%= files[i]._id %>" alt="">
+                    <input type="file" name="img<%=i%>" id="file" class="custom-file-input" />
+                </div>
+                <%}else{%>
+                <div class="custom-file mb-3">
+                    <label for="file" class="custom-file-label"> Choose Photo <%=(i)%>:</label>
+                    <!-- Here -->
+                    <img style="width: 100px; height: 100px;" src="" alt="">
+                    <input type="file" name="img<%=i%>" id="file" class="custom-file-input" />
+                </div>
+                <%}%>
+                <%}%>
+        
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" class="form-control" placeholder="Enter Title" value="<%= books.bookTitle%>"/>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="text" id="price" name="price" class="form-control" placeholder="Enter Price" value="<%= books.price%>" />
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" id="description" name="description" class="form-control"
+                placeholder="Enter Description" value="<%= books.bookTitle%>"/>
+        </div>
+        <div class="form-group">
+            <label for="categories">Categories: </label>
+            <select name="categories" id="categories" class="form-control">
+<%
+                var options = [ "Arts", "Bibliography" ];
+                for ( var i = 0; i < options.length; i++ )
+                {
+                    var selected = ( books.category == options[i] ) ? "selected" : "";
+                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
+                }
+                %>
+                
+                </select>
+            <!-- <select name="categories" id="categories" class="form-control">
+                <option value="none" selected disabled hidden>
+                    Select a Categories
+                </option>
+                <option value="Art">Art</option>
+            </select> -->
+        </div>
+        <div class="form-group">
+            <label for="language">Language: </label>
+            <select name="language" id="language" class="form-control">
+                <%
+                                var options = [ "Chinese", "English", "B. Malaysia" ];
+                                for ( var i = 0; i < options.length; i++ )
+                                {
+                                    var selected = ( books.language == options[i] ) ? "selected" : "";
+                                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
+                                }
+                                %>
+                                
+                                </select>
+        </div>
+        <div class="form-group">
+            <label for="year">Year Published: </label>
+            <input type="text" id="year" name="year" class="form-control" value = "<%=books.year%>" placeholder="Enter Year Published" />
+        </div>
+        <div class="form-group">
+            <label for="states">States: </label>
+            <select name="states" id="states" class="form-control">
+<%
+                var options = [ "Penang", "Johor" ];
+                for ( var i = 0; i < options.length; i++ )
+                {
+                    var selected = ( books.states == options[i].toLowerCase() ) ? "selected" : "";
+                    %><option value="<%=options[ i ].toLowerCase() %>" <%=selected %>><%=options[ i ] %></option><%
+                }
+                %>
+                
+                </select>
+        </div>
+        <div class="form-group">
+            <label for="location">Area Location</label>
+            <select name="location" id="location" class="form-control">
+                <%var options = [ "Simpang Ampat", "Butterworth" ];
+                for ( var i = 0; i < options.length; i++ )
+                {
+                    var selected = ( books.location == options[i].toLowerCase() ) ? "selected" : "";
+                    %><option value="<%=options[ i ].toLowerCase() %>" <%=selected %>><%=options[ i ] %></option><%
+                }
+                %>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="noTel">No. Tel</label>
+            <input type="number" id="noTel" name="noTel" value="<%= (books.contactNumber)? '0'+books.contactNumber: '' %>" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="whatsappLink">Whatsapp Link: </label>
+            <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (books.whatsappLink)? books.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+        </div>
+        <div class="form-group">
+            <label for="messengerLink">Messenger Link: </label>
+            <input type="text" id="messengerLink" name="messengerLink"  value="<%= (books.messengerLink)? books.messengerLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+        </div>
+        <div class="form-group">
+            <label for="wechatLink">WeChat Link: </label>
+            <input type="text" id="wechatLink" name="wechatLink"  value="<%= (books.wechatLink)? books.wechatLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+        </div>
+        <div class="form-group">
+            <label for="instagramLink">Instagram Link: </label>
+            <input type="text" id="instagramLink" name="instagramLink"  value="<%= (books.instagramLink)? books.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+            Update
+        </button>
+    </form>
+
+
+
+    <% }%>
+
+    <script>
+
+function showPreviewOne(event){
+          if(event.target.files.length > 0){
+            let src = URL.createObjectURL(event.target.files[0]);
+            let preview = document.getElementById("file-ip-1-preview");
+            preview.src = src;
+            preview.style.display = "block";
+          } 
+        }
+
+        function showPreviewCoverImage(event){
+          if(event.target.files.length > 0){
+            let src = URL.createObjectURL(event.target.files[0]);
+            let preview = document.getElementById("coverImg");
+            preview.src = src;
+            preview.style.display = "block";
+          } 
+        }
+        function myImgRemoveFunctionOne() {
+          document.getElementById("file-ip-1-preview").src = "https://i.ibb.co/ZVFsg37/default.png";
+        }
+    
+      </script>

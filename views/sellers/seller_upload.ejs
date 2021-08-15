@@ -3,6 +3,9 @@
     <p class="lead mb-3">
         Welcome to Seller's Upload, <%= user.firstName + " " + user.lastName%>!
     </p>
+    <a href="/sellers/dashboard" class="btn btn-secondary">Dashboard</a>
+    <a href="/forums" class="btn btn-secondary">Forum</a>
+    <a href="/users/logout" class="btn btn-secondary">Logout</a>
     <form action="/sellers/upload" method="POST" enctype="multipart/form-data">
         <div class="custom-file mb-3">
             <label for="file" class="custom-file-label"> Choose Cover Photo:</label>
@@ -55,13 +58,57 @@
             <label for="year">Year Published: </label>
             <input type="text" id="year" name="year" class="form-control" placeholder="Enter Year Published" />
         </div>
+        <div class="form-group">
+            <label for="states">States: </label>
+            <select name="states" id="states" class="form-control">
+<%
+                var options = [ "Penang", "Johor" ];
+                for ( var i = 0; i < options.length; i++ )
+                {
+                    var selected = ( user.states == options[i] ) ? "selected" : "";
+                    %><option value="<%=options[ i ]%>" <%=selected %>><%=options[ i ] %></option><%
+                }
+                %>
+                
+                </select>
+        </div>
+        <div class="form-group">
+            <label for="location">Area Location</label>
+            <select name="location" id="location" class="form-control">
+                <%var options = [ "Simpang Ampat", "Butterworth" ];
+                for ( var i = 0; i < options.length; i++ )
+                {
+                    var selected = ( user.location == options[i]) ? "selected" : "";
+                    %><option value="<%=options[ i ]%>" <%=selected %>><%=options[ i ] %></option><%
+                }
+                %>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="noTel">No. Tel</label>
+            <input type="number" id="noTel" name="noTel" value="<%= (user.noTel)? '0'+user.noTel: '' %>" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="whatsappLink">Whatsapp Link: </label>
+            <input type="text" id="whatsappLink" name="whatsappLink" class="form-control" placeholder="Enter if you have one!" />
+        </div>
+        <div class="form-group">
+            <label for="messengerLink">Messenger Link: </label>
+            <input type="text" id="messengerLink" name="messengerLink" class="form-control" placeholder="Enter if you have one!" />
+        </div>
+        <div class="form-group">
+            <label for="wechatLink">WeChat Link: </label>
+            <input type="text" id="wechatLink" name="wechatLink" class="form-control" placeholder="Enter if you have one!" />
+        </div>
+        <div class="form-group">
+            <label for="instagramLink">Instagram Link: </label>
+            <input type="text" id="instagramLink" name="instagramLink" class="form-control" placeholder="Enter link if you have one!" />
+        </div>
         <button type="submit" class="btn btn-primary btn-block">
             Upload
         </button>
     </form>
-    <a href="/sellers/dashboard" class="btn btn-secondary">Dashboard</a>
-    <a href="/forums" class="btn btn-secondary">Forum</a>
-    <a href="/users/logout" class="btn btn-secondary">Logout</a>
+    
 
 
     <% }%>

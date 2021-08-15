@@ -28,11 +28,9 @@ const UserSchema = mongoose.Schema({
             type: String,
             require: true
         },
-        dateOfBirth:{
-            type: Date,
-            require: true,
-            default: Date.now
-            
+        noTel:{
+            type: Long,
+            require: true,        
         },
         states:{
             type: String,

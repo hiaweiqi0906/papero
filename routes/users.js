@@ -9,9 +9,9 @@ const User = require('../models/User')
 
 router.get('/login', (req, res) => {
     if (req.user) {
-        res.redirect('/store')
+        res.redirect('/')
     } else {
-        res.render('login')
+        res.render('index/login')
     }
 })
 
@@ -22,14 +22,14 @@ router.get('/logout', (req, res) => {
 })
 
 router.get('/register', ensureAuthenticated, (req, res) => {
-    res.render('register')
+    res.render('index/register')
 })
 
 router.post('/register', (req, res) => {
-    const { first_name, last_name, noIC, email, password, password2, gender, dob, states, location } = req.body
+    const { first_name, last_name, noIC, email, password, password2, gender, noTel, states, location } = req.body
     let errors = []
 
-    if (!first_name || !last_name || !noIC || !email || !gender || dob == '' || states == '' || location == '' || !password || !password2)
+    if (!first_name || !last_name || !noIC || !email || !gender || !noTel || states == '' || location == '' || !password || !password2)
         errors.push({ msg: 'Please enter all fields' })
 
     if (password !== password2)
@@ -44,8 +44,8 @@ router.post('/register', (req, res) => {
     }
 
     if (errors.length > 0) {
-        res.render('seller_register', {
-            errors, first_name, last_name, noIC, email, password, password2, gender, dob, states, location
+        res.render('index/seller_register', {
+            errors, first_name, last_name, noIC, email, password, password2, gender, noTel, states, location
         })
     } else {
         User.findOne({
@@ -54,9 +54,9 @@ router.post('/register', (req, res) => {
         })
             .then((user) => {
                 if (!user) {
-                    const date_of_birth = dob
+                    
                     const newUser = new User({
-                        firstName: first_name, lastName: last_name, noIC, email, password, gender, dateOfBirth: date_of_birth, states, location
+                        firstName: first_name, lastName: last_name, noIC, email, password, gender, noTel, states, location
                     })
                     bcrypt.genSalt(10, function (err, salt) {
                         if (err) throw err
@@ -76,8 +76,8 @@ router.post('/register', (req, res) => {
                     });
                 } else {
                     errors.push({ msg: 'User existed. Please Login' })
-                    res.render('seller_register', {
-                        errors, first_name, last_name, noIC, email, password, password2, gender, dob, states, location
+                    res.render('index/seller_register', {
+                        errors, first_name, last_name, noIC, email, password, password2, gender, noTel, states, location
                     })
                 }
             })
@@ -88,7 +88,7 @@ router.post('/register', (req, res) => {
 router.post('/login', (req, res, next) => {
 
     passport.authenticate('local', {
-        successRedirect: '/store',
+        successRedirect: '/',
         failureRedirect: '/users/login',
         failureFlash: true
     })(req, res, next)

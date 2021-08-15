@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-
+var Long = mongoose.Schema.Types.Long;
 const BookSchema = mongoose.Schema({
     bookTitle:{
         type: String,
@@ -83,6 +83,30 @@ const BookSchema = mongoose.Schema({
     },
     quantity:{
         type: Number,
+    },
+    states:{
+        type: String,
+        required: true,
+    },
+    location:{
+        type: String,
+        required: true,
+    },
+    contactNumber:{
+        type: Long,
+        required: true,
+    },
+    whatsappLink:{
+        type: String,
+    },
+    messengerLink:{
+        type: String,
+    },
+    wechatLink:{
+        type: String,
+    },
+    instagramLink:{
+        type: String,
     }
 })
 

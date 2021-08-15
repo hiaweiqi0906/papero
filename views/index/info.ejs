@@ -1,0 +1,114 @@
+<h1 class="mt-4">Seller Upload</h1>
+
+    <p class="lead mb-3">
+        <% if(user) { %>
+            Welcome to Info Page, <%= user.firstName + " " + user.lastName%>! 
+        <%}%>
+    </p>
+    <a href="/" class="btn btn-secondary">Papero</a>
+    <a href="/forums" class="btn btn-secondary">Forum</a>
+    
+        <div class="custom-file mb-3">
+            <img style="width: 100px; height: 100px;" src="../../image/<%= files[0]._id %>" alt="">
+        </div>
+        <%for(var i=1; i<4; i++){%>
+            <%if(files[i]){%>
+                <div class="custom-file mb-3">
+                    <img style="width: 50px; height: 50px;" src="../../image/<%= files[i]._id %>" alt="">
+                </div>
+            <%}%>
+        <%}%>
+        
+        <div class="form-group">
+            <label for="title">Title</label>
+            <p><%= books.bookTitle%></p>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <p>RM <%= books.price%> </p>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <p><%= books.bookTitle%></p>
+        </div>
+        <div class="form-group">
+            <label for="categories">Categories: </label>
+            <p><%=books.category%></p>
+        </div>
+        <div class="form-group">
+            <label for="language">Language: </label>
+            <p><%= books.language%></p>
+        </div>
+        <div class="form-group">
+            <label for="year">Year Published: </label>
+            <p><%=books.year%></p>
+        </div>
+        <div class="form-group">
+            <label for="states">States: </label>
+            <p><%=books.states%></p>
+        </div>
+        <div class="form-group">
+            <label for="location">Area Location</label>
+            <p><%=books.location%></p>
+        </div>
+        <div class="form-group">
+            <label for="noTel">No. Tel</label>
+            <p>0<%=books.contactNumber%></p>
+        </div>
+        <div class="form-group">
+            <%if(books.whatsappLink){%>
+                <label for="whatsappLink">Whatsapp Link: </label>
+            <p><%=books.whatsappLink%></p>
+            <%}%>
+        </div>
+        <div class="form-group">
+            
+            <%if(books.messengerLink){%>
+                <label for="messengerLink">Messenger Link: </label>
+                <p><%=books.messengerLink%></p>
+            <%}%>
+        </div>
+        <div class="form-group">
+            <%if(books.wechatLink){%>
+                <label for="wechatLink">WeChat Link: </label>
+            <p><%=books.wechatLink%></p>
+            <%}%>
+            
+        </div>
+        <div class="form-group">
+            <%if(books.instagramLink){%>
+                <label for="instagramLink">Instagram Link: </label>
+            <p><%=books.instagramLink%></p>
+            <%}%>
+            
+        </div>
+
+
+
+
+
+
+    <script>
+
+function showPreviewOne(event){
+          if(event.target.files.length > 0){
+            let src = URL.createObjectURL(event.target.files[0]);
+            let preview = document.getElementById("file-ip-1-preview");
+            preview.src = src;
+            preview.style.display = "block";
+          } 
+        }
+
+        function showPreviewCoverImage(event){
+          if(event.target.files.length > 0){
+            let src = URL.createObjectURL(event.target.files[0]);
+            let preview = document.getElementById("coverImg");
+            preview.src = src;
+            preview.style.display = "block";
+          } 
+        }
+        function myImgRemoveFunctionOne() {
+          document.getElementById("file-ip-1-preview").src = "https://i.ibb.co/ZVFsg37/default.png";
+        }
+    
+      </script>

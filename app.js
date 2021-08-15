@@ -3,6 +3,7 @@ const expressLayouts = require('express-ejs-layouts')
 const mongoose = require('mongoose')
 const flash = require('connect-flash');
 const session = require('express-session')
+const MongoDBSession = require('connect-mongodb-session')(session)
 const passport = require('passport')
 const path = require('path')
 const crypto = require('crypto')
@@ -53,12 +54,16 @@ const upload = multer({ storage });
 
 
 //promise
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
   .then((result) => {
     console.log("successfully connected to db");
   })
   .catch((err) => console.log(err))
 
+const store = new MongoDBSession({
+  uri: 'mongodb+srv://yijoetan:yijoetan123@cluster0.rexmz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+  collection: 'mySessions',
+})
 
 //ejs
 app.use(expressLayouts);
@@ -100,8 +105,8 @@ app.use(methodOverride('_method'))
 //routers
 app.use("/", require("./routes/index"))
 app.use("/users", require("./routes/users"))
-app.use("/forums", require("./routes/forums"))
 app.use('/sellers', require('./routes/sellers'))
+app.use('/forums', require('./routes/forums'))
 
 app.delete('/files/:id', (req, res) => {
   gfs.remove({ _id: req.params.id, root: 'book-img' }, (err, gridStore) => {
@@ -111,7 +116,7 @@ app.delete('/files/:id', (req, res) => {
 })
 
 app.get('/image/:filename', (req, res) => {
-  gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+  gfs.files.findOne({ _id: new mongoose.Types.ObjectId(req.params.filename) }, (err, file) => {
     if (!file || file.length === 0) {
       return res.status(404).json({
         err: 'No files exist'
@@ -128,8 +133,23 @@ app.get('/image/:filename', (req, res) => {
   })
 })
 
-
-
+app.get('/imageId/:filename', (req, res) => {
+  gfs.files.findOne({ _id: (req.params.filename) }, (err, file) => {
+    if (!file || file.length === 0) {
+      return res.status(404).json({
+        err: 'No files exist'
+      })
+    }
+    //check is img
+    if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
+      //read output to browser
+      var readstream = gfs.createReadStream(file.filename);
+      readstream.pipe(res);
+    } else {
+      res.status(404).json({ err: 'Not an image' })
+    }
+  })
+})
 
 //set up port and listen to port
 const PORT = process.env.PORT || 3000;
