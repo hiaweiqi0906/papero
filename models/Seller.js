@@ -3,41 +3,25 @@ require('mongoose-long')(mongoose);
 var Long = mongoose.Schema.Types.Long;
 
 const SellerSchema= mongoose.Schema({
-    first_name:{
-        type: String,
-        require: true
-    },
-    last_name:{
-        type: String,
-        require: true
-    },
-    noIC:{
-        type: Long,
-        require: true
-    },
     email:{
         type: String,
-        require: true
+        required: true
     },
-    password:{
+    whatsappLink:{
         type: String,
-        require: true
+        default: ''
     },
-    gender:{
+    messengerLink:{
         type: String,
-        require: true
+        default: ''
     },
-    noTel:{
-        type: Long,
-        require: true,        
-    },
-    states:{
+    wechatLink:{
         type: String,
-        require: true
+        default: ''
     },
-    location:{
+    instagramLink:{
         type: String,
-        require: true
+        default: ''
     }
 })
 

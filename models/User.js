@@ -23,7 +23,7 @@ const UserSchema = mongoose.Schema({
         password:{
             type: String,
             require: true
-        }  ,
+        },
         gender:{
             type: String,
             require: true
@@ -39,6 +39,31 @@ const UserSchema = mongoose.Schema({
         location:{
             type: String,
             require: true
+        },
+        avatarUri:{
+            type:String
+        },
+        cloudinaryID:{
+            type:String
+        },
+        favouriteUri:{
+            type: Array
+        },
+        whatsappLink:{
+            type: String,
+            default: ''
+        },
+        messengerLink:{
+            type: String,
+            default: ''
+        },
+        wechatLink:{
+            type: String,
+            default: ''
+        },
+        instagramLink:{
+            type: String,
+            default: ''
         }
 })
 

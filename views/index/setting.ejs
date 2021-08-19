@@ -5,7 +5,7 @@
                 <i class="fas fa-user-plus"></i> User Setting
             </h1>
             <%- include('../partials/messages') -%>
-                <form action="/seller/setting" method="POST">
+                <form action="/users/setting" method="POST">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
                         <input type="text" id="first_name" name="first_name" class="form-control"
@@ -31,19 +31,6 @@
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" class="form-control" placeholder="Enter Email"
                         value="<%= (user.email)? user.email : '' %>" />
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-control"
-                            placeholder="Create Password"
-                            value="" />
-
-                    </div>
-                    <div class="form-group">
-                        <label for="password2">Confirm Password</label>
-                        <input type="password" id="password2" name="password2" class="form-control"
-                            placeholder="Confirm Password"
-                            value="" />
                     </div>
 
                     <div class="form-group">
@@ -93,24 +80,48 @@
                     </div>
                     <div class="form-group">
                         <label for="whatsappLink">Whatsapp Link: </label>
-                        <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (seller.whatsappLink)? books.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+                        <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (user.whatsappLink)? user.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
                     </div>
                     <div class="form-group">
                         <label for="messengerLink">Messenger Link: </label>
-                        <input type="text" id="messengerLink" name="messengerLink"  value="<%= (seller.messengerLink)? books.messengerLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+                        <input type="text" id="messengerLink" name="messengerLink"  value="<%= (user.messengerLink)? user.messengerLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
                     </div>
                     <div class="form-group">
                         <label for="wechatLink">WeChat Link: </label>
-                        <input type="text" id="wechatLink" name="wechatLink"  value="<%= (seller.wechatLink)? books.wechatLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+                        <input type="text" id="wechatLink" name="wechatLink"  value="<%= (user.wechatLink)? user.wechatLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
                     </div>
                     <div class="form-group">
                         <label for="instagramLink">Instagram Link: </label>
-                        <input type="text" id="instagramLink" name="instagramLink"  value="<%= (seller.instagramLink)? books.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
+                        <input type="text" id="instagramLink" name="instagramLink"  value="<%= (user.instagramLink)? user.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">
                         Update
                     </button>
 
+                </form>
+                <form action="/users/changePassword" method="POST">
+                    <div class="form-group">
+                        <label for="oldPassword">Password</label>
+                        <input type="password" id="oldPassword" name="oldPassword" class="form-control"
+                            placeholder="Enter Old Password"
+                            value="" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword1">New Password</label>
+                        <input type="password" id="newPassword1" name="newPassword1" class="form-control"
+                            placeholder="Enter New Password"
+                            value="" />
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword2">Confirm New Password</label>
+                        <input type="password" id="newPassword2" name="newPassword2" class="form-control"
+                            placeholder="Confirm Password"
+                            value="" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Change Password
+                    </button>
                 </form>
                 <p class="lead mt-4">Have An Account? <a href="/users/login">Login</a></p>
         </div>

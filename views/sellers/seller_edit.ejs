@@ -10,7 +10,7 @@
         <div class="custom-file mb-3">
             <label for="file" class="custom-file-label"> Choose Cover Photo:</label>
             <!-- Here -->
-            <img style="width: 100px; height: 100px;" src="../../image/<%= files[0]._id %>" alt="">
+                <img style="width: 100px; height: 100px;" src="<%= files[0] %>" alt="">
             <input type="file" name="coverImg" id="coverImg" class="custom-file-input" onchange="showPreviewCoverImage(event);" />
         </div>
 
@@ -20,7 +20,7 @@
                     <label for="file" class="custom-file-label"> Choose Photo <%=(i)%>:</label>
                     <!-- Here -->
                     
-                    <img style="width: 100px; height: 100px;" src="../../image/<%= files[i]._id %>" alt="">
+                    <img style="width: 100px; height: 100px;" src="<%= files[i] %>" alt="">
                     <input type="file" name="img<%=i%>" id="file" class="custom-file-input" />
                 </div>
                 <%}else{%>
@@ -91,8 +91,8 @@
                 var options = [ "Penang", "Johor" ];
                 for ( var i = 0; i < options.length; i++ )
                 {
-                    var selected = ( books.states == options[i].toLowerCase() ) ? "selected" : "";
-                    %><option value="<%=options[ i ].toLowerCase() %>" <%=selected %>><%=options[ i ] %></option><%
+                    var selected = ( books.states == options[i] ) ? "selected" : "";
+                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
                 }
                 %>
                 
@@ -104,8 +104,8 @@
                 <%var options = [ "Simpang Ampat", "Butterworth" ];
                 for ( var i = 0; i < options.length; i++ )
                 {
-                    var selected = ( books.location == options[i].toLowerCase() ) ? "selected" : "";
-                    %><option value="<%=options[ i ].toLowerCase() %>" <%=selected %>><%=options[ i ] %></option><%
+                    var selected = ( books.location == options[i]) ? "selected" : "";
+                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
                 }
                 %>
             </select>

@@ -12,46 +12,24 @@ const { GridFsStorage } = require('multer-gridfs-storage')
 const Grid = require('gridfs-stream')
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
+const dotenv = require('dotenv')
+const upload = require('./utils/multer')
+const cloudinary = require("./utils/cloudinary");
+
+
+dotenv.config()
+
 
 const app = express()
+app.use(express.json())
 require('./config/passport')(require('passport'))
 
 //mongodb stuff
 const db = require('./config/keys').MongoURI;
 const { connect, options } = require('./routes/index');
 
-let gfs
-var conn = mongoose.createConnection(db);
-conn.once('open', () => {
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection('book-img')
-  // all set!
-})
 
 let imageName = []
-
-//create storage engine
-const storage = new GridFsStorage({
-  url: db,
-  file: (req, file) => {
-    return new Promise((resolve, reject) => {
-      crypto.randomBytes(16, (err, buf) => {
-        if (err) {
-          return reject(err);
-        }
-        const filename = buf.toString('hex') + path.extname(file.originalname);
-        imageName.push(filename)
-        const fileInfo = {
-          filename: filename,
-          bucketName: 'book-img'
-        };
-        resolve(fileInfo);
-      });
-    });
-  }
-});
-const upload = multer({ storage });
-
 
 //promise
 mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
@@ -59,15 +37,10 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true, useCreat
     console.log("successfully connected to db");
   })
   .catch((err) => console.log(err))
-
-const store = new MongoDBSession({
-  uri: 'mongodb+srv://yijoetan:yijoetan123@cluster0.rexmz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-  collection: 'mySessions',
-})
-
 //ejs
 app.use(expressLayouts);
 app.set("view engine", "ejs");
+
 
 
 //body-parser
@@ -151,6 +124,79 @@ app.get('/imageId/:filename', (req, res) => {
   })
 })
 
+app.get('/testupload', (req, res) => {
+  res.render('testupload')
+})
+
+app.post('/testupload', upload.fields([{ //upload pic to db
+  name: 'coverImg', maxCount: 1
+}, {
+  name: 'img1', maxCount: 1
+}, {
+  name: 'img2', maxCount: 1
+}, {
+  name: 'img3', maxCount: 1
+}]), async (req, res) => {
+  try {
+    const urls = [];
+    const files = req.files;
+    let imgID = []
+    if (req.files.coverImg) {
+        imgID.push(req.files.coverImg[0]);
+    }
+    if (req.files.img1) {
+        imgID.push(req.files.img1[0]);
+    }
+    if (req.files.img2) {
+        imgID.push(req.files.img2[0]);
+    }
+    if (req.files.img3) {
+        imgID.push(req.files.img3[0]);
+    }
+    console.log(imgID)
+    let results=[]
+    let imgUri = []
+    for(let i=0; i<imgID.length; i++){
+      var result = await (cloudinary.uploader.upload(imgID[i].path))
+      imgUri.push(result.secure_url)
+      results.push(result)
+    }
+    console.log(results)
+    console.log(imgUri);
+    res.send(`<img src="${imgUri[0]}"/>`)
+    //console.log(files.coverImg)
+    // for (const file of files) {
+    //   const { path } = file;
+    //   const newPath = await cloudinary.uploader.upload(path);
+    //   urls.push(newPath);
+    // }
+
+    // const product = new Product({
+    //   name: req.body.name,
+    //   productImages: urls.map(url => url.res),
+    // });
+    // console.log(urls)
+    // Upload image to cloudinary
+    // let results = []
+    // req.files.forEach((file)=>{
+    //   results.push(await (cloudinary.uploader.upload(file.path)))
+    // })
+    // const result = await cloudinary.uploader.upload(req.files.path);
+
+    // // Create new user
+    // let user = new User ({
+    //   name: req.body.name,
+    //   avatar: result.secure_url,
+    //   cloudinary_id: result.public_id,
+    // });
+    // // Save user
+    // await user.save();
+    // res.json(user);
+    // console.log(results)
+  } catch (err) {
+    console.log(err);
+  }
+});
 //set up port and listen to port
 const PORT = process.env.PORT || 3000;
 

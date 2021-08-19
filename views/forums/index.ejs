@@ -15,10 +15,10 @@
   <%}%>
     <a href="/sellers/dashboard" class="btn btn-secondary">Seller Dashboard</a>
     <a href="/" class="btn btn-secondary">Homepage</a>
-    <a href="/articles/new" class="btn btn-success">New Article</a>
-    <a href="/articles/mypost" class="btn btn-success">View My Post</a>
+    <a href="/forums/new" class="btn btn-success">New Article</a>
+    <a href="/forums/mypost" class="btn btn-success">View My Post</a>
 
-    <% articles.forEach(article => { %>
+    <% articles.forEach((article) => { %>
       <div class="card mt-4">
         <div class="card-body">
           <h4 class="card-title"><%= article.title %></h4>
@@ -29,8 +29,26 @@
             Created By : <%= article.createdBy %>
           </div>
           <div class="card-text mb-2"><%= article.description %></div>
-          <a href="articles/<%= article.slug %>" class="btn btn-primary">Read More</a>
+          <a href="./<%= article.id %>" class="btn btn-primary">Read More</a>
           
+        </div>
+        <div class="card-body">
+          <%if(article.comment){%>
+            <%(article.comment).forEach(function(commentDetails){%>
+              <a><%= commentDetails.userId%></a>
+              <p><%= commentDetails.commentAt.toLocaleDateString()%></p>
+              <h6><%= commentDetails.comments%></h6>
+            <%})%>
+            <%}%>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <form action="/forums/comment/<%= article.id %>" method="POST" >
+            <label for="comments">Comments</label>
+            <textarea name="comments" id="comments" class="form-control"></textarea>
+            <button type="submit" >Comment</button>
+          </form>
+          </div>
         </div>
       </div>
     <% }) %>

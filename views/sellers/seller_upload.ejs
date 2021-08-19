@@ -90,19 +90,19 @@
         </div>
         <div class="form-group">
             <label for="whatsappLink">Whatsapp Link: </label>
-            <input type="text" id="whatsappLink" name="whatsappLink" class="form-control" placeholder="Enter if you have one!" />
+            <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (user.whatsappLink)? user.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
         </div>
         <div class="form-group">
             <label for="messengerLink">Messenger Link: </label>
-            <input type="text" id="messengerLink" name="messengerLink" class="form-control" placeholder="Enter if you have one!" />
+            <input type="text" id="messengerLink" name="messengerLink"  value="<%= (user.messengerLink)? user.messengerLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
         </div>
         <div class="form-group">
             <label for="wechatLink">WeChat Link: </label>
-            <input type="text" id="wechatLink" name="wechatLink" class="form-control" placeholder="Enter if you have one!" />
+            <input type="text" id="wechatLink" name="wechatLink"  value="<%= (user.wechatLink)? user.wechatLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
         </div>
         <div class="form-group">
             <label for="instagramLink">Instagram Link: </label>
-            <input type="text" id="instagramLink" name="instagramLink" class="form-control" placeholder="Enter link if you have one!" />
+            <input type="text" id="instagramLink" name="instagramLink"  value="<%= (user.instagramLink)? user.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
         </div>
         <button type="submit" class="btn btn-primary btn-block">
             Upload

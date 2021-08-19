@@ -14,15 +14,28 @@
     <a href="/users/register" class="btn btn-secondary">Register</a>
     <%}%>
   
+    <%if(userAvatar){%>
+    <img src="/image/<%= userAvatar._id %>"/>
+    <%}%>
 
+<h1><%=seller.firstName%> <%=seller.lastName%></h1>
+<h3><%=seller.states%>, <%=seller.location%></h3>
 <%for(let i=0; i<books.length ; i++ ){%>
             
         
     <div style="width: 200px; height: 250px;background-color: burlywood;">
         <%if(files[i]){%>
                 <div class="card card-body mb-3">
-                    <img style="width: 100px; height: 100px;" src="<%= files[i] %>" alt="">
-                </div>       
+                <%if(files[i].isImage){%>
+                    <img style="width: 100px; height: 100px;" src="/image/<%= files[i]._id %>" alt="">
+                <%}else{%>
+                    <%= files[i].filename%>
+                <%}%>
+                <!-- <form  method="POST" action="/files/<%= files[i]._id %>?_method=DELETE">
+                    <button class="btn btn-danger btn-block mt-4">Delete</button>
+                </form> -->
+                </div>
+                
         <%} else {%>
             <p> No files to show</p>
         <%}%>

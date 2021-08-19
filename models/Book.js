@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 var Long = mongoose.Schema.Types.Long;
+const bookImgUri = mongoose.Schema({ name: String });
+const bookIdUri = mongoose.Schema({ name: String });
 const BookSchema = mongoose.Schema({
     bookTitle:{
         type: String,
@@ -10,6 +12,13 @@ const BookSchema = mongoose.Schema({
         required: true,
     },
     imageUri:{
+        type: Array,
+    },
+    coverImgId:{
+        type: String,
+        required: true,
+    },
+    imageId:{
         type: Array,
     },
     price:{

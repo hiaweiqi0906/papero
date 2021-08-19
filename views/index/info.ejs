@@ -9,12 +9,12 @@
     <a href="/forums" class="btn btn-secondary">Forum</a>
     
         <div class="custom-file mb-3">
-            <img style="width: 100px; height: 100px;" src="../../image/<%= files[0]._id %>" alt="">
+            <img style="width: 100px; height: 100px;" src="<%= files[0]%>" alt="">
         </div>
         <%for(var i=1; i<4; i++){%>
             <%if(files[i]){%>
                 <div class="custom-file mb-3">
-                    <img style="width: 50px; height: 50px;" src="../../image/<%= files[i]._id %>" alt="">
+                    <img style="width: 50px; height: 50px;" src="<%= files[i]%>" alt="">
                 </div>
             <%}%>
         <%}%>
@@ -82,8 +82,10 @@
             <%}%>
             
         </div>
-
-
+        
+        <form action="/sellers/<%= books.uploadedBy %>" method="get">
+            <button type="submit"> Seller Info </button>
+        </form>
 
 
 
