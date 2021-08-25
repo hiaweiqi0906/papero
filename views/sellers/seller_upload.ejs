@@ -1,114 +1,222 @@
-<h1 class="mt-4">Seller Upload</h1>
-<% if(user) { %>
-    <p class="lead mb-3">
-        Welcome to Seller's Upload, <%= user.firstName + " " + user.lastName%>!
-    </p>
-    <a href="/sellers/dashboard" class="btn btn-secondary">Dashboard</a>
-    <a href="/forums" class="btn btn-secondary">Forum</a>
-    <a href="/users/logout" class="btn btn-secondary">Logout</a>
-    <form action="/sellers/upload" method="POST" enctype="multipart/form-data">
-        <div class="custom-file mb-3">
-            <label for="file" class="custom-file-label"> Choose Cover Photo:</label>
-            <input type="file" name="coverImg" id="file" class="custom-file-input" />
-        </div>
-        <div class="custom-file mb-3">
-            <label for="file" class="custom-file-label"> Choose Photo 1:</label>
-            <input type="file" name="img1" id="file" class="custom-file-input" />
-        </div>
-        <div class="custom-file mb-3">
-            <label for="file" class="custom-file-label"> Choose Photo 2:</label>
-            <input type="file" name="img2" id="file" class="custom-file-input" />
-        </div>
-        <div class="custom-file mb-3">
-            <label for="file" class="custom-file-label"> Choose Photo 3:</label>
-            <input type="file" name="img3" id="file" class="custom-file-input" />
-        </div>
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" id="title" name="title" class="form-control" placeholder="Enter Title" />
-        </div>
-        <div class="form-group">
-            <label for="price">Price</label>
-            <input type="text" id="price" name="price" class="form-control" placeholder="Enter Price" />
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <input type="text" id="description" name="description" class="form-control"
-                placeholder="Enter Description" />
-        </div>
-        <div class="form-group">
-            <label for="categories">Categories: </label>
-            <select name="categories" id="categories" class="form-control">
-                <option value="none" selected disabled hidden>
-                    Select a Categories
-                </option>
-                <option value="Art">Art</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="language">Language: </label>
-            <select name="language" id="language" class="form-control">
-                <option value="none" selected disabled hidden>
-                    Select a Language
-                </option>
-                <option value="Chinese">Chinese</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="year">Year Published: </label>
-            <input type="text" id="year" name="year" class="form-control" placeholder="Enter Year Published" />
-        </div>
-        <div class="form-group">
-            <label for="states">States: </label>
-            <select name="states" id="states" class="form-control">
-<%
-                var options = [ "Penang", "Johor" ];
-                for ( var i = 0; i < options.length; i++ )
-                {
-                    var selected = ( user.states == options[i] ) ? "selected" : "";
-                    %><option value="<%=options[ i ]%>" <%=selected %>><%=options[ i ] %></option><%
-                }
-                %>
-                
-                </select>
-        </div>
-        <div class="form-group">
-            <label for="location">Area Location</label>
-            <select name="location" id="location" class="form-control">
-                <%var options = [ "Simpang Ampat", "Butterworth" ];
-                for ( var i = 0; i < options.length; i++ )
-                {
-                    var selected = ( user.location == options[i]) ? "selected" : "";
-                    %><option value="<%=options[ i ]%>" <%=selected %>><%=options[ i ] %></option><%
-                }
-                %>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="noTel">No. Tel</label>
-            <input type="number" id="noTel" name="noTel" value="<%= (user.noTel)? '0'+user.noTel: '' %>" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="whatsappLink">Whatsapp Link: </label>
-            <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (user.whatsappLink)? user.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
-        </div>
-        <div class="form-group">
-            <label for="messengerLink">Messenger Link: </label>
-            <input type="text" id="messengerLink" name="messengerLink"  value="<%= (user.messengerLink)? user.messengerLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
-        </div>
-        <div class="form-group">
-            <label for="wechatLink">WeChat Link: </label>
-            <input type="text" id="wechatLink" name="wechatLink"  value="<%= (user.wechatLink)? user.wechatLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
-        </div>
-        <div class="form-group">
-            <label for="instagramLink">Instagram Link: </label>
-            <input type="text" id="instagramLink" name="instagramLink"  value="<%= (user.instagramLink)? user.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">
-            Upload
-        </button>
-    </form>
-    
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 
-    <% }%>
+    <title>PAPERO</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+    <nav class="navbar navbar-expand-sm navbar-light" style="background-color: darkred;">
+        <a class="navbar-brand" href="/">
+            <img src="" alt="" width="30" height="24" class="d-inline-block align-top">
+            <span class="hidden" style="color: floralwhite;">PAPERO</span>
+        </a>
+
+      
+      <ul class="navbar-nav ms-auto text-center">
+        <li>
+          <a class="nav-link" href="/" style="color: floralwhite;">Home</a>
+        </li>
+        <li>
+          <a class="nav-link" href="/sellers/dashboard" style="color: floralwhite;">Seller</a>
+        </li>
+        <li>
+          <a class="nav-link" href="/forums/" style="color: floralwhite;">Forum</a>
+        </li>
+        <li>
+            <%if(user){%>
+            <a class="nav-link" href="/users/logout" style="color: floralwhite;">Logout</a>
+            <%}else{%>
+              <li>
+                <a class="nav-link" href="/users/login" style="color: floralwhite;">Login</a>
+              </li>
+              <li>
+                <a class="nav-link" href="/users/register" style="color: floralwhite;">Register</a>
+              </li>
+                <%}%>
+          </li>
+      </ul>
+    </nav>
+    <section class="h-100 h-custom gradient-custom-2" style="background-color: #eee;">
+        <div class="container py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12">
+              <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+                <form action="/sellers/upload" method="POST" enctype="multipart/form-data">
+                <div class="card-body p-0">
+                  <div class="row g-0">
+                    <div class="col-lg-6">
+                      <div class="p-5">
+                        <h3 class="fw-normal mb-5";>Upload Book</h3>
+                        
+                        
+                            <div class="row">
+                                <div class="col-md-6 mb-2 pb-2">
+                                    <div class="custom-file mb-3">
+                                        <label for="file" class="custom-file-label"> Choose Cover Photo:</label>
+                                        <input type="file" name="coverImg" id="file" class="custom-file-input" />
+                                    </div>
+                                </div>
+                            </div>    
+                            <div class="row">
+                                <div class="col-md-6 mb-2 pb-2">
+                                    <div class="custom-file mb-3">
+                                        <label for="file" class="custom-file-label"> Choose Photo 1:</label>
+                                        <input type="file" name="img1" id="file" class="custom-file-input" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2 pb-2">
+                                    <div class="custom-file mb-3">
+                                        <label for="file" class="custom-file-label"> Choose Photo 2:</label>
+                                        <input type="file" name="img2" id="file" class="custom-file-input" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-4 pb-2">
+                                    <div class="form-group">
+                                        <label for="title">Title</label>
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="Enter Title" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4 pb-2">
+                                    <div class="form-group">
+                                        <label for="price">Price</label>
+                                        <input type="text" id="price" name="price" class="form-control" placeholder="Enter Price" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4 pb-2">
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <input type="text" id="description" name="description" class="form-control"
+                                        placeholder="Enter Description" />
+                            </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-2 pb-2">
+                                    <div class="form-group">
+                                        <label for="categories">Categories: </label>
+                                        <select name="categories" id="categories" class="form-control">
+                                            <option value="none" selected disabled hidden>
+                                                Select a Categories
+                                            </option>
+                                            <option value="Art">Art</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2 pb-2">
+                                    <div class="form-group">
+                                        <label for="language">Language: </label>
+                                        <select name="language" id="language" class="form-control">
+                                            <option value="none" selected disabled hidden>
+                                                Select a Language
+                                            </option>
+                                            <option value="Chinese">Chinese</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2 pb-2">
+                                    <div class="form-group">
+                                        <label for="year">Year Published: </label>
+                                        <input type="text" id="year" name="year" class="form-control" placeholder="Enter Year Published" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>        
+                    <div class="col-lg-6 bg-indigo text-black">
+                        <div class="p-5">
+                            <h3 class="fw-normal mb-5">Personal Details</h3>
+        
+                            <div class="mb-4 pb-2">
+                            <div class="form-outline form-white">
+                                <label for="states">States: </label>
+                                <select name="states" id="states" class="form-control">
+                <%
+                                var options = [ "Penang", "Johor" ];
+                                for ( var i = 0; i < options.length; i++ )
+                                {
+                                    var selected = ( user.states == options[i] ) ? "selected" : "";
+                                    %><option value="<%=options[ i ]%>" <%=selected %>><%=options[ i ] %></option><%
+                                }
+                                %>
+                                
+                                </select>
+                            </div>
+                            </div>
+        
+                            <div class="mb-4 pb-2">
+                            <div class="form-outline form-white">
+                                <label for="location">Area Location</label>
+                                <select name="location" id="location" class="form-control">
+                                    <%var options = [ "Simpang Ampat", "Butterworth" ];
+                                    for ( var i = 0; i < options.length; i++ )
+                                    {
+                                        var selected = ( user.location == options[i]) ? "selected" : "";
+                                        %><option value="<%=options[ i ]%>" <%=selected %>><%=options[ i ] %></option><%
+                                    }
+                                    %>
+                                </select>
+                            </div>
+                            </div>
+        
+                            <div class="mb-4 pb-2">
+                            <div class="form-outline form-white">
+                                <label for="noTel">Contact Number: </label>
+                                <input type="text" id="noTel" name="noTel" value="<%= (user.noTel)? '0'+user.noTel: '' %>" class="form-control">
+                            </div>
+                            </div>
+
+                            <div class="mb-4 pb-2">
+                                <div class="form-outline form-white">
+                                    <label for="whatsappLink">Whatsapp Link: </label>
+                                    <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (user.whatsappLink)? user.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+                                </div>
+                            </div>
+
+                            <div class="mb-4 pb-2">
+                                <div class="form-outline form-white">
+                                    <label for="instagramLink">Instagram Link: </label>
+                                    <input type="text" id="instagramLink" name="instagramLink"  value="<%= (user.instagramLink)? user.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
+                                </div>
+                            </div>
+
+                            <div class="mb-4 pb-2">
+                                <div class="form-outline form-white">
+                                    <label for="messengerLink">Messenger Link: </label>
+                                    <input type="text" id="messengerLink" name="messengerLink"  value="<%= (user.messengerLink)? user.messengerLink: '' %>" class="form-control" placeholder="Enter if you have one!" />    
+                                </div>
+                            </div>
+
+                            <div class="mb-4 pb-2">
+                                <div class="form-outline form-white">
+                                    <label for="wechatLink">WeChat Link: </label>
+                                    <input type="text" id="wechatLink" name="wechatLink"  value="<%= (user.wechatLink)? user.wechatLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </div>        
+                  </div>
+                </div>
+                <div class="text-center mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    Upload
+                </button>
+           
+                </div> 
+            </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </body>
+</html>
+<!-- <h1 class="mt-4">Seller Upload</h1>

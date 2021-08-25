@@ -1,4 +1,148 @@
-<h1 class="mt-4">Seller Upload</h1>
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <title>PAPERO</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-sm navbar-light" style="background-color: darkred;">
+      <a class="navbar-brand" href="/">
+          <img src="" alt="" width="30" height="24" class="d-inline-block align-top">
+          <span class="hidden" style="color: floralwhite;">PAPERO</span>
+      </a>
+
+      
+      <ul class="navbar-nav ms-auto text-center">
+        
+        <li>
+          <a class="nav-link" href="/sellers/dashboard" style="color: floralwhite;">Seller</a>
+        </li>
+        <li>
+          <a class="nav-link" href="/forums/" style="color: floralwhite;">Forum</a>
+        </li>
+        <li>
+            <%if(user){%>
+            <a class="nav-link" href="/users/logout" style="color: floralwhite;">Logout</a>
+            <%}else{%>
+              <li>
+                <a class="nav-link" href="/users/login" style="color: floralwhite;">Login</a>
+              </li>
+              <li>
+                <a class="nav-link" href="/users/register" style="color: floralwhite;">Register</a>
+              </li>
+                <%}%>
+          </li>
+      </ul>
+    </nav>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+    
+    <section class="h-100" style="background-color: #eee;">
+        <div class="container-fluid py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col">
+              <div class="card card-registration my-4" style="border-radius: 25px;">
+                <div class="card-body p-md-5">
+                  <div class="row g-0">
+                    <form action="/sellers/<%= books.uploadedBy %>" method="get">
+                      <button type="submit"> Seller Info </button>
+                    </form>
+                    <form action="/view/<%=books._id%>" method="POST">
+                        <button type="submit"> Add to Wishlist </button>
+                    </form>
+                    <div class="col-lg-4">
+                      <div class="p-5">
+                        <div class="text-center circle-img img-circle mb-4 pb-6">
+                          <img src="<%= files[0]%>" style="width: 250px; height:350px;">
+                        </div>
+                        <%for(var i=1; i<4; i++){%>
+                            <%if(files[i]){%>
+                                <div class="custom-file mb-3">
+                                    <img style="width: 50px; height: 50px;" src="<%= files[i]%>" alt="">
+                                </div>
+                            <%}%>
+                        <%}%>
+                      </div>
+                    </div>      
+                    <div class="col-lg-8 bg-indigo text-black">
+                      <div class="p-5">
+                        <div class="form-group">
+                            <p class="text-center h2 fw-bold mb-2 mx-1 mx-md-4 mt-4"><%= books.bookTitle%></p>
+                        </div>
+      
+                        <div class="mb-4 pb-2">
+                            <div class="form-group">
+                                <p class="text-center h6 mb-2 mx-1 mx-md-4 mt-4"><%=books.states%></p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 pb-2">
+                            <div class="form-group">
+                                <p class="text-center h5 fw-bold mb-2 mx-1 mx-md-4 mt-4"><%=books.location%></p>
+                            </div>
+                        </div>
+                        <div class="mb-4 pb-2">
+                            <div class="form-group">
+                                <p class="text-center h3 fw-bold mb-2 mx-1 mx-md-4 mt-4">RM <%= books.price%> </p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                        <button type="submit" style=" background-color:lightgray; padding: 20px 135px;">
+                          <a style="color: floralwhite;">Add To Wishlist</a>
+                        </button>
+                        <p></p>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" style=" background-color:black; padding: 20px 145px;">
+                              <a style="color: floralwhite;">Contact : 0<%=books.contactNumber%></a>
+                            </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p></p>
+                  <div class="container-fluid" style="background-color: lightgrey; border-radius: 25px;">
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class=" mb-4 pb-6">
+                          <div class="p-5">
+                          <p class="text-center h2 fw-bold mb-3 mx-1 mx-md-4 mt-6" >Description</p>
+                          <p class="h6 mb-4 mx-1 mx-md-4 mt-6"><%=books.description%></p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="mb-4 pb-6">
+                          <div class="p-5">
+                          <p class="text-center h2 fw-bold mb-3 mx-1 mx-md-4 mt-6" >Specification</p>
+                          <p class="h6 mb-4 mx-1 mx-md-4 mt-6"></p>
+                          <div class="form-group">
+                            <li class="h6 mb-4 mx-1 mx-md-4 mt-6">Category : <%=books.category%></li>
+                          </div>
+                          <div class="form-group">
+                            <li class="h6 mb-4 mx-1 mx-md-4 mt-6">Language : <%=books.language%></li>
+                          </div>
+                          <div class="form-group">
+                            <li class="h6 mb-4 mx-1 mx-md-4 mt-6">Year Published : <%=books.year%></li>
+                          </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </body>
+</html>
+<!-- <h1 class="mt-4">Seller Upload</h1>
 
     <p class="lead mb-3">
         <% if(user) { %>
@@ -113,4 +257,4 @@ function showPreviewOne(event){
           document.getElementById("file-ip-1-preview").src = "https://i.ibb.co/ZVFsg37/default.png";
         }
     
-      </script>
+      </script> -->

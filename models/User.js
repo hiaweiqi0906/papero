@@ -4,47 +4,53 @@ var Long = mongoose.Schema.Types.Long;
 
 const UserSchema = mongoose.Schema({
     
+        googleId:{
+            type: String,
+            default: ''
+        },
         firstName:{
             type: String,
-            require: true
+            default: ''
         },
         lastName:{
             type: String,
-            require: true
+            default: ''
         },
         noIC:{
             type: Long,
-            require: true
+            default: 0
         },
         email:{
             type: String,
-            require: true
+            default: ''
         },
         password:{
             type: String,
-            require: true
+            default: ''
         },
         gender:{
             type: String,
-            require: true
+            default: ''
         },
         noTel:{
             type: Long,
-            require: true,        
+            default: 0,        
         },
         states:{
             type: String,
-            require: true
+            default: ''
         },
         location:{
             type: String,
-            require: true
+            default: ''
         },
         avatarUri:{
-            type:String
+            type:String,
+            default: ''
         },
         cloudinaryID:{
-            type:String
+            type:String,
+            default: ''
         },
         favouriteUri:{
             type: Array
@@ -64,6 +70,14 @@ const UserSchema = mongoose.Schema({
         instagramLink:{
             type: String,
             default: ''
+        },
+        following:{
+            type: Array,
+            default: []
+        },
+        activated:{
+            type: Boolean,
+            default: true
         }
 })
 

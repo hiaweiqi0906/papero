@@ -13,38 +13,40 @@
     <a href="/users/login" class="btn btn-secondary">Login</a>
     <a href="/users/register" class="btn btn-secondary">Register</a>
     <%}%>
-  
-    <div>
-         <%if(seller.avatarUri){%>
-    <img style="width: 100px; height: 100px;" src="<%= seller.avatarUri %>"/>
-    <%}%>
+    <form action="/search" method="post">
+        <input type="text" style="width: 200px;" name="searchbar" value="<%=(typeof searchResults != 'undefined')? searchResults: ''%>" id="searchbar">
+        <button type="submit">Go!</button>
+    </form>
 
-<h1><%=seller.firstName%> <%=seller.lastName%></h1>
-<h3><%=seller.states%>, <%=seller.location%></h3>
-    </div>
-   
 <%for(let i=0; i<books.length ; i++ ){%>
             
         
     <div style="width: 200px; height: 250px;background-color: burlywood;">
-        <%if(files[i]){%>
+
                 <div class="card card-body mb-3">
-                    <img style="width: 100px; height: 100px;" src="<%= files[i] %>" alt="">
-                
-                <!-- <form  method="POST" action="/files/<%= files[i]._id %>?_method=DELETE">
-                    <button class="btn btn-danger btn-block mt-4">Delete</button>
-                </form> -->
-                </div>
-                
-        <%} else {%>
-            <p> No files to show</p>
-        <%}%>
+                    <img style="width: 100px; height: 100px;" src="<%= books[i].coverImgUri %>" alt="">
+                </div>       
+
+
+
         <p><%= books[i].bookTitle %></p>
         <form action="/view/<%=books[i]._id%>" method="get">
             <button type="submit"> Open </button>
         </form>
+        
     </div>
 <%}%>
+
+
+<%if(currentPage>1){%>
+    <a href="/search=<%=searchResults%>/page=<%=currentPage-1%>/total=<%=pages%>" class="btn btn-secondary">Last Page</a>
+    <%}%>
+    <%for(let i=1; i<=pages; i++){%>
+    <a href="/search=<%=searchResults%>/page=<%=i%>/total=<%=pages%>"><%=i%></a>
+    <%}%>
+    <%if(currentPage<pages){%>
+    <a href="/search=<%=searchResults%>/page=<%=++currentPage%>/total=<%=pages%>" class="btn btn-secondary">Next Page</a>
+    <%}%>
 
 
   

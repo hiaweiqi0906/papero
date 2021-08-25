@@ -2,9 +2,11 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
-const { ensureAuthenticated } = require('../config/checkAuth')
+const { ensureAuthenticated } = require('../config/auth')
 const Seller = require('../models/Seller')
 const User = require('../models/User')
+const upload = require('../utils/multer')
+const cloudinary = require("../utils/cloudinary");
 
 
 router.get('/login', (req, res) => {
@@ -15,21 +17,69 @@ router.get('/login', (req, res) => {
     }
 })
 
+router.put("/:id", upload.single("image"), async (req, res) => {
+    try {
+      let user = await User.findById(req.params.id);
+      // Delete image from cloudinary
+      await cloudinary.uploader.destroy(user.cloudinary_id);
+      // Upload image to cloudinary
+      let result;
+      if (req.file) {
+        result = await cloudinary.uploader.upload(req.file.path);
+      }
+      const data = {
+        name: req.body.name || user.name,
+        avatar: result?.secure_url || user.avatar,
+        cloudinary_id: result?.public_id || user.cloudinary_id,
+      };
+      user = await User.findByIdAndUpdate(req.params.id, data, { new: true });
+      res.json(user);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
 router.get('/logout', (req, res) => {
     req.logout()
     req.flash('success_msg', 'You are logged out')
     res.redirect('/users/login');
 })
 
-router.get('/register', ensureAuthenticated, (req, res) => {
+router.get('/register', (req, res) => {
     res.render('index/register')
 })
 
+router.post('/changeAvatar',upload.single("image"), async (req, res)=>{
+
+    try {
+        let user = await User.findById(req.user._id);
+        // Delete image from cloudinary
+        if(user.cloudinaryId){
+            await cloudinary.uploader.destroy(user.cloudinaryId);
+        }
+        
+        // Upload image to cloudinary
+        let result;
+        if (req.file) {
+          result = await cloudinary.uploader.upload(req.file.path);
+        }
+        const data = {
+            avatarUri: result?.secure_url || user.avatarUri,
+            cloudinaryId: result?.public_id || user.cloudinaryId,
+        };
+        user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
+
+        res.redirect('/')
+      } catch (err) {
+        console.log(err);
+      }
+})
+
 router.post('/register', (req, res) => {
-    const { first_name, last_name, noIC, email, password, password2, gender, noTel, states, location } = req.body
+    const { first_name, last_name, email, password, password2, gender, states, location } = req.body
     let errors = []
 
-    if (!first_name || !last_name || !noIC || !email || !gender || !noTel || states == '' || location == '' || !password || !password2)
+    if (!first_name || !last_name || !email || !gender|| states == '' || location == '' || !password || !password2)
         errors.push({ msg: 'Please enter all fields' })
 
     if (password !== password2)
@@ -39,24 +89,23 @@ router.post('/register', (req, res) => {
         errors.push({ msg: 'Password should be at least 8 characters' })
     }
 
-    if ((noIC.length != 12 && noIC != "")) {
-        errors.push({ msg: 'IC format incorrect' })
-    }
+    // if ((noIC.length != 12 && noIC != "")) {
+    //     errors.push({ msg: 'IC format incorrect' })
+    // }
 
     if (errors.length > 0) {
         res.render('index/register', {
-            errors, first_name, last_name, noIC, email, password, password2, gender, noTel, states, location
+            errors, first_name, last_name, email, password, password2, gender, states, location
         })
     } else {
         User.findOne({
-            noIC: noIC,
             email: email
         })
             .then((user) => {
                 if (!user) {
 
                     const newUser = new User({
-                        firstName: first_name, lastName: last_name, noIC, email, password, gender, noTel, states, location
+                        firstName: first_name, lastName: last_name, email, password, gender, states, location
                     })
                     bcrypt.genSalt(10, function (err, salt) {
                         if (err) throw err
@@ -83,7 +132,7 @@ router.post('/register', (req, res) => {
                 } else {
                     errors.push({ msg: 'User existed. Please Login' })
                     res.render('index/register', {
-                        errors, first_name, last_name, noIC, email, password, password2, gender, noTel, states, location
+                        errors, first_name, last_name, email, password, password2, gender, states, location
                     })
                 }
             })

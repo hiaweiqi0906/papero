@@ -28,28 +28,6 @@ conn.once('open', () => {
     gfs.collection('book-img')
 })
 
-// //create storage engine
-// const storage = new GridFsStorage({
-//     url: db,
-//     file: (req, file) => {
-//         return new Promise((resolve, reject) => {
-//             crypto.randomBytes(16, (err, buf) => {
-//                 if (err) {
-//                     return reject(err);
-//                 }
-//                 const filename = buf.toString('hex') + path.extname(file.originalname);
-//                 imageName.push(filename)
-//                 const fileInfo = {
-//                     filename: filename,
-//                     bucketName: 'book-img'
-//                 };
-//                 resolve(fileInfo);
-//             });
-//         });
-//     }
-// });
-// const upload = multer({ storage });
-
 
 //middleware
 router.use(express.urlencoded({ extended: false }))
@@ -158,7 +136,7 @@ router.post('/upload', upload.fields([{ //upload pic to db
         category: req.body.categories,
         uploadedBy: req.user.email,
         publishingCompany: '',
-        language: req.body.language,
+        bookLanguage: req.body.language,
         isbn: 0,
         coverType: '',
         year: req.body.year,
@@ -333,8 +311,6 @@ router.get('/setting', (req, res) => {
     res.render("index/setting", { user: req.user });
 })
 
-
-
 router.get('/:email', (req, res) => {
     User.findOne({ email: (req.params.email) }, async function (err, user) {
         if (err) throw (err);
@@ -343,12 +319,7 @@ router.get('/:email', (req, res) => {
         let booksImg = [];
 
         //search user avatar
-        if (user.avatarUri) {
-            gfs.files.findOne({ _id: new mongoose.Types.ObjectId(user.avatarUri) }, function (err, file) {
-                if (err) throw err
-                userAvatar = file;
-            })
-        } else {
+        if (!(user.avatarUri)) {
             userAvatar = false
         }
         const books = await Book.find({ uploadedBy: user.email }).sort({ uploadedAt: 'desc' })
@@ -359,23 +330,29 @@ router.get('/:email', (req, res) => {
         if (books.length === 0) res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: bookCoverImg });
         let allImgUri = []
         books.forEach(function (book) {
-            allImgUri.push(new mongoose.Types.ObjectId(book.coverImgUri))
+            allImgUri.push((book.coverImgUri))
         })
 
-        conn.db.collection("book-img.files").find({ _id: { $in: allImgUri } }).toArray((err, files) => {
-            if (!files || files.length === 0) {
-                res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: false });
-            } else {
-                files.map((file) => {
-                    if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
-                        file.isImage = true
-                    } else {
-                        file.isImage = false
-                    }
-                })
-                res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: files });
-            }
-        })
+        if(allImgUri.length == 0){
+            res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: false });
+        }else{
+            res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: allImgUri });
+        }
+
+        // conn.db.collection("book-img.files").find({ _id: { $in: allImgUri } }).toArray((err, files) => {
+        //     if (!files || files.length === 0) {
+        //         res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: false });
+        //     } else {
+        //         files.map((file) => {
+        //             if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
+        //                 file.isImage = true
+        //             } else {
+        //                 file.isImage = false
+        //             }
+        //         })
+        //         res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: files });
+        //     }
+        // })
 
         //search all books coverImg
 

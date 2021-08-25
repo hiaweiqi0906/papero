@@ -22,7 +22,7 @@
           <div class="card-subtitle text-muted mb-2">
             Created By : <%= article.createdBy %>
           </div>
-          <div class="card-text mb-2"><%= article.description %></div>
+          <div class="card-text mb-2"><%= article.content %></div>
           <a href="./<%= article.id %>" class="btn btn-primary">Read More</a>
           <a href="./edit/<%= article.id %>" class="btn btn-info">Edit</a>
           <form action="/<%= article.id %>?_method=DELETE" method="POST" class="d-inline">

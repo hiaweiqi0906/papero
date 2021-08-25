@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
-var Long = mongoose.Schema.Types.Long;
+// var Long = mongoose.Schema.Types.Long;
+require('mongoose-long')(mongoose);
+const {Types: {Long}} = mongoose;
 const bookImgUri = mongoose.Schema({ name: String });
 const bookIdUri = mongoose.Schema({ name: String });
+
 const BookSchema = mongoose.Schema({
     bookTitle:{
         type: String,
@@ -76,7 +79,7 @@ const BookSchema = mongoose.Schema({
     publishingCompany:{
         type: String,
     },
-    language:{
+    bookLanguage:{
         type: String,
         required: true,
     },
@@ -103,7 +106,6 @@ const BookSchema = mongoose.Schema({
     },
     contactNumber:{
         type: Long,
-        required: true,
     },
     whatsappLink:{
         type: String,
@@ -119,5 +121,8 @@ const BookSchema = mongoose.Schema({
     }
 })
 
+BookSchema.index({bookTitle: 'text', description: 'text'});
+
 const Book = mongoose.model('Book', BookSchema)
+Book.createIndexes()
 module.exports = Book

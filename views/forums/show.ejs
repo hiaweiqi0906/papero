@@ -15,13 +15,79 @@
     </div>
     <div class="text-muted mb-2">
       Author : <%= article.createdBy %>
+    <div>
+      <%- article.content %>
     </div>
+  </div>
+    
     <a href="/forums/" class="btn btn-secondary">All Articles</a>
     
+    <%for(let i=0; i<article.comment.length; i++){%>
+      <div class="card mt-4">
+        <div class="card-body">
+          <img src="<%=userList[i].avatarUri%>" style="width: 50px; height: 50px;"/>
+          <h4 class="card-title"><%= article.comment[i].comments %></h4>
+          <div class="card-subtitle text-muted mb-2">
+            <%= article.comment[i].commentAt.toLocaleDateString() %>
+          </div>
+          <a class="card-subtitle text-muted mb-2" href="../forums/users/<%=userList[i]._id%>">
+            Created By : <%= article.comment[i].createdBy %>
+          </a>
+          <a id="replyLink_<%=article.comment[i]._id%>" onclick="document.getElementById('replyDiv_<%-(article.comment[i]._id)%>').style.display = 'block';">Reply</a><br>
+          <div class="form-group" id="replyDiv_<%=article.comment[i]._id%>"  style="display: none">
+            <form action="/forums/reply/<%= article._id %>" method="POST" >
+              <input type="hidden" name="replyToEmail" id="replyToEmail" value="<%=article.comment[i].userEmail%>">
+              <input type="hidden" name="commentID" id="commentID" value="<%=article.comment[i]._id%>">
+              <!-- <label for="reply">Reply</label> -->
+              <textarea name="reply" id="reply" class="form-control"></textarea>
+              <button type="submit" >Reply</button>
+            </form>
+          </div>
+          <hr>
+          
+          <%if(replys[i]){%>
+            <i class="fas fa-comment-alt"></i>  <%=replys[i].length%> replys<p></p>
+            <%for(let j=0; j<replys[i].length; j++){%>
 
-    <div>
-      <%- article.sanitizedHtml %>
-    </div>
+              <img style="height: 50px; width: 50px;" src="<%= replys[i][j].userImg %>" alt="">
+              <h6><%=replys[i][j].userName%>   -- <%=replys[i][j].replyAt.toLocaleDateString()%></h6>
+              <p><%=replys[i][j].replyText%></p>
+              <i class="fas fa-comment-alt"></i>  <%=replys[i][j].replyLength%> Replied<br>
+              <a id="replyLink_<%=replys[i][j].replyId%>" onclick="document.getElementById('replyDiv_<%-(replys[i][j].replyId)%>').style.display = 'block';">Reply</a><br>
+              <div class="form-group" id="replyDiv_<%=replys[i][j].replyId%>"  style="display: none">
+              <form action="/forums/reply_reply/<%= article._id %>" method="POST" >
+                <input type="hidden" name="replyToEmail" id="replyToEmail" value="<%=replys[i][j].userDetails.email%>">
+                <input type="hidden" name="replyToId" id="replyToId" value="<%=replys[i][j].userDetails._id%>">
+                <input type="hidden" name="commentID" id="commentID" value="<%=article.comment[i]._id%>">
+                <!-- <label for="reply">Reply</label> -->
+                <textarea name="reply" id="reply" class="form-control"></textarea>
+                <button type="submit" >Reply</button>
+              </form>
+            </div>
+            <hr>
+            <%}%>
+          <%}%>
+          
+        </div>
+      </div>
+    
+  <script type="text/javascript">
+  document.getElementById("replyLink_article.comment[i]._id").onclick = function() {
+
+document.getElementById("replyDiv_article.comment[i]._id").style.display = "block";
+
+}
+  </script>
+  <%}%>
+    <div class="card-body">
+            <div class="form-group">
+              <form action="/forums/comment/<%= article._id %>" method="POST" >
+                <label for="comments">Comments</label>
+                <textarea name="comments" id="comments" class="form-control"></textarea>
+                <button type="submit" >Comment</button>
+              </form>
+            </div>
+          </div>   
   </div>
 </body>
 </html>

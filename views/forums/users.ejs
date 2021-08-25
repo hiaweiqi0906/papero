@@ -1,0 +1,63 @@
+<h1 class="mt-4">Papero</h1>
+
+<%if(user){%>
+    <p class="lead mb-3">Welcome <%= user.firstName +' '+ user.lastName %></p>
+<%}%>
+<a href="/sellers/dashboard" class="btn btn-secondary">Seller</a>
+
+<a href="/forums/" class="btn btn-secondary">Forum</a>
+
+<%if(user){%>
+<a href="/users/logout" class="btn btn-secondary">Logout</a>
+<%}else{%>
+    <a href="/users/login" class="btn btn-secondary">Login</a>
+    <a href="/users/register" class="btn btn-secondary">Register</a>
+    <%}%>
+  
+    <div>
+         <%if(blogger.avatarUri){%>
+    <img style="width: 100px; height: 100px;" src="<%= blogger.avatarUri %>"/>
+    <%}%>
+
+<h1><%=blogger.firstName%> <%=blogger.lastName%></h1>
+<h3><%=blogger.states%>, <%=blogger.location%></h3>
+    </div>
+   
+    <%for(let i=0; i<articles.length; i++){%>
+        <div class="card mt-4">
+            <div class="card-body">
+              <img src="<%=blogger.avatarUri%>" style="width: 50px; height: 50px;"/>
+              <h4 class="card-title"><%= articles[i].title %></h4>
+              <div class="card-subtitle text-muted mb-2">
+                <%= articles[i].createdAt.toLocaleDateString() %>
+              </div>
+              <a class="card-subtitle text-muted mb-2" href="./users/<%=blogger._id%>">
+                Created By : <%= articles[i].createdBy %>
+              </a>
+              <div class="card-text mb-2"><%= articles[i].content %></div>
+              <a href="./<%= articles[i].id %>" class="btn btn-primary">Read More</a>
+            </div>
+            <%if(comments[i]){%>
+                <%comments[i].forEach((subcomments) =>{%>
+                    <img style="height: 50px; width: 50px;" src="<%= subcomments.userImg %>" alt="">
+                    <h6><%=subcomments.userName%>   -- <%=subcomments.commentAt.toLocaleDateString()%></h6>
+                    <p><%=subcomments.commentText%></p>
+                    <%})%>
+                    <%}%>
+  <div class="card-body">
+              <div class="form-group">
+                <form action="/forums/comment/<%= articles[i].id %>" method="POST" >
+                <label for="comments">Comments</label>
+                <textarea name="comments" id="comments" class="form-control"></textarea>
+                <button type="submit" >Comment</button>
+              </form>
+              </div>
+            </div>
+    
+            
+            
+          </div>
+        
+          <%}%>
+
+  

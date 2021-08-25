@@ -1,4 +1,236 @@
-<div class="row mt-5">
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <title>PAPERO</title>
+    <style>
+      .circle-img {
+        width: 150px;
+        height: 150px;
+        overflow: hidden;
+      }
+
+      .circle-img img {
+        height: 100%;
+        transform: translateX(-50%);
+        margin-left: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+    <nav class="navbar navbar-expand-sm navbar-light" style="background-color: darkred;">
+      <a class="navbar-brand" href="/">
+          <img src="" alt="" width="30" height="24" class="d-inline-block align-top">
+          <span class="hidden" style="color: floralwhite;">PAPERO</span>
+      </a>
+
+      
+      <ul class="navbar-nav ms-auto text-center">
+        <li>
+          <a class="nav-link" href="/" style="color: floralwhite;">Home</a>
+        </li>
+        <li>
+          <a class="nav-link" href="/sellers/dashboard" style="color: floralwhite;">Seller</a>
+        </li>
+        <li>
+          <a class="nav-link" href="/forums/" style="color: floralwhite;">Forum</a>
+        </li>
+        <li>
+            <%if(user){%>
+            <a class="nav-link" href="/users/logout" style="color: floralwhite;">Logout</a>
+            <%}else{%>
+              <li>
+                <a class="nav-link" href="/users/login" style="color: floralwhite;">Login</a>
+              </li>
+              <li>
+                <a class="nav-link" href="/users/register" style="color: floralwhite;">Register</a>
+              </li>
+                <%}%>
+          </li>
+      </ul>
+    </nav>
+    <section class="h-100 h-custom gradient-custom-2" style="background-color: #eee;">
+      <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-12">
+            <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+              <div class="card-body p-0">
+                <div class="row g-0">
+                  <div class="col-lg-6">
+                    <div class="p-5">
+                      <h3 class="fw-normal mb-5";">User Setting</h3>
+                      <div class="circle-img img-circle mb-4 pb-6">
+                        <img src="<%= user.avatarUri %>" class="rounded-circle">
+                      </div>
+                      <div class="row">
+
+                        <div class="col-md-6 mb-2 pb-2">
+
+                          <div class="form-outline">
+                            <label for="first_name">First Name</label>
+                            <input type="text" id="first_name" name="first_name" class="form-control"
+                            placeholder="Enter First Name"
+                            value="<%= (user.firstName)? user.firstName : '' %>" />
+                            
+                          </div>
+    
+                        </div>
+                        <div class="col-md-6 mb-2 pb-2">
+    
+                          <div class="form-outline">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" class="form-control"
+                                placeholder="Enter Last Name"
+                                value="<%= (user.lastName)? user.lastName : '' %>" />
+                          </div>
+    
+                        </div>
+                      </div>
+    
+                      <div class="mb-4 pb-2">
+                        <div class="form-outline">
+                          <label for="email">Email</label>
+                          <input type="email" id="email" name="email" class="form-control" placeholder="Enter Email"
+                          value="<%= (user.email)? user.email : '' %>" />
+                        </div>
+                      </div>
+    
+                      <div class="row">
+                        <div class="col-md-6 mb-2 pb-2">
+    
+                          <div class="form-outline">
+                            <label for="noTel">No. Tel</label>
+                            <input type="number" id="noTel" name="noTel" class="form-control" value="<%= '0'+(user.noTel)? user.noTel : '' %>">
+                          </div>
+    
+                        </div>
+                        <div class="col-md-6 mb-2 pb-2">
+    
+                          <div class="form-outline">
+                            <label for="gender">Gender</label>
+                            <select name="gender" id="gender" class="form-control">
+                                <%var options = [ "Male", "Female", "Prefer Not to Say" ];
+                                for ( var i = 0; i < options.length; i++ )
+                                {
+                                    var selected = ( user.gender == options[i] ) ? "selected" : "";
+                                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
+                                }
+                                %>
+                            </select>
+                          </div>
+    
+                        </div>
+                      </div>
+                      
+                      <div class="row">
+                        <div class="col-md-6 mb-2 pb-2">
+
+                          <div class="form-outline">
+                            <label for="states">States</label>
+                            <select name="states" id="states" class="form-control">
+                                <%
+                                var options = [ "Penang", "Johor" ];
+                                for ( var i = 0; i < options.length; i++ )
+                                {
+                                    var selected = ( user.states == options[i] ) ? "selected" : "";
+                                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
+                                }
+                                %>
+                                
+                              </select>
+                            
+                          </div>
+    
+                        </div>
+                        <div class="col-md-6 mb-2 pb-2">
+    
+                          <div class="form-outline">
+                            <label for="location">Area Location</label>
+                            <select name="location" id="location" class="form-control">
+                                <%var options = [ "Simpang Ampat", "Butterworth" ];
+                                for ( var i = 0; i < options.length; i++ )
+                                {
+                                    var selected = ( user.location == options[i]) ? "selected" : "";
+                                    %><option value="<%=options[ i ] %>" <%=selected %>><%=options[ i ] %></option><%
+                                }
+                                %>
+                            </select>
+                          </div>
+    
+                        </div>
+                      </div>
+                      
+                      <div class="mb-4 pb-2">
+                        <div class="form-outline">
+                          <label for="whatsappLink">Whatsapp Link: </label>
+                          <input type="text" id="whatsappLink" name="whatsappLink" value="<%= (user.whatsappLink)? user.whatsappLink: '' %>" class="form-control" placeholder="Enter if you have one!" />
+                        </div>
+                      </div>
+
+                      <div class="mb-4 pb-2">
+                        <div class="form-outline">
+                          <label for="instagramLink">Instagram Link: </label>
+                          <input type="text" id="instagramLink" name="instagramLink"  value="<%= (user.instagramLink)? user.instagramLink: '' %>" class="form-control" placeholder="Enter link if you have one!" />
+                        </div>
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-block">
+                        Update
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 bg-indigo text-black">
+                    <div class="p-5">
+                      <h3 class="fw-normal mb-5">Change Password</h3>
+    
+                      <div class="mb-4 pb-2">
+                        <div class="form-outline form-white">
+                          <label for="oldPassword">Password</label>
+                          <input type="password" id="oldPassword" name="oldPassword" class="form-control"
+                              placeholder="Enter Old Password"
+                              value="" />
+                        </div>
+                      </div>
+    
+                      <div class="mb-4 pb-2">
+                        <div class="form-outline form-white">
+                          <label for="newPassword1">New Password</label>
+                          <input type="password" id="newPassword1" name="newPassword1" class="form-control"
+                              placeholder="Enter New Password"
+                              value="" />
+                        </div>
+                      </div>
+    
+                      <div class="mb-4 pb-2">
+                        <div class="form-outline form-white">
+                          <label for="newPassword2">Confirm New Password</label>
+                          <input type="password" id="newPassword2" name="newPassword2" class="form-control"
+                              placeholder="Confirm Password"
+                              value="" />
+                        </div>
+                      </div>
+    
+                      <button type="submit" class="btn btn-primary btn-block">
+                        Change Password
+                      </button>
+    
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </body>
+</html>
+<!-- <div class="row mt-5">
     <div class="col-md-6 m-auto">
         <div class="card card-body">
             <h1 class="text-center mb-3">
@@ -126,4 +358,4 @@
                 <p class="lead mt-4">Have An Account? <a href="/users/login">Login</a></p>
         </div>
     </div>
-</div>
+</div> -->

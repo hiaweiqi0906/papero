@@ -1,0 +1,18 @@
+
+<%if(books.length>0){%>
+    <%    books.forEach((book)=>{%>
+        <div style="width: 200px; height: 250px;background-color: burlywood;">
+
+            <div class="card card-body mb-3">
+                <img style="width: 100px; height: 100px;" src="<%= book.coverImgUri %>" alt="">
+            </div>       
+
+
+
+    <p><%= book.bookTitle %></p>
+    <form action="/view/<%=book._id%>" method="get">
+        <button type="submit"> Open </button>
+    </form>
+</div>
+<%    })%>
+<%}%>
