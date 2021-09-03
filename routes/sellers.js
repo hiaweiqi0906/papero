@@ -75,6 +75,15 @@ router.get("/dashboard", ensureAuthenticated, async (req, res) => {
     }
 });
 
+
+router.get('/testLogin', (req, res) => {
+    console.log(req.session)
+    if (req.user) {
+        res.sendStatus(200)
+    } else {
+        res.sendStatus(401)
+    }
+})
 /**
  * route: /sellers/upload
  * desc: to allow user to upload
@@ -96,63 +105,122 @@ router.post('/upload', upload.fields([{ //upload pic to db
 }, {
     name: 'img3', maxCount: 1
 }]), async (req, res) => {
-    const newFiles = [];
-    const files = req.files;
-    let imgID = []
-    if (req.files.coverImg) {
-        newFiles.push(req.files.coverImg[0]);
-    }
-    if (req.files.img1) {
-        newFiles.push(req.files.img1[0]);
-    }
-    if (req.files.img2) {
-        newFiles.push(req.files.img2[0]);
-    }
-    if (req.files.img3) {
-        newFiles.push(req.files.img3[0]);
-    }
-    // let results=[]
-    let imgUri = []
-    for (let i = 0; i < newFiles.length; i++) {
-        var result = await(cloudinary.uploader.upload(newFiles[i].path))
-        imgUri.push(result.secure_url)
-        imgID.push(result.public_id)
-        // results.push(result)
-    }
-    //check all info entered
-    const coverImageUri = imgUri.shift()
-    const coverImageId = imgID.shift()
+    // const newFiles = [];
+    // let imgID = []
+    // if (req.files.coverImg) {
+    //     newFiles.push(req.files.coverImg[0]);
+    // }
+    // if (req.files.img1) {
+    //     newFiles.push(req.files.img1[0]);
+    // }
+    // if (req.files.img2) {
+    //     newFiles.push(req.files.img2[0]);
+    // }
+    // if (req.files.img3) {
+    //     newFiles.push(req.files.img3[0]);
+    // }
+    // // let results=[]
+    // let imgUri = []
+    // for (let i = 0; i < newFiles.length; i++) {
+    //     var result = await(cloudinary.uploader.upload(newFiles[i].path))
+    //     imgUri.push(result.secure_url)
+    //     imgID.push(result.public_id)
+    //     // results.push(result)
+    // }
+    // //check all info entered
+    // const coverImageUri = imgUri.shift()
+    // const coverImageId = imgID.shift()
 
-    //put photo uri to book instance
-    //put all info to books collection
-    const newBook = new Book({
-        bookTitle: req.body.title,
-        coverImgUri: coverImageUri,
-        imageUri: imgUri,
-        coverImgId: coverImageId,
-        imageId: imgID,
-        price: req.body.price,
-        description: req.body.description,
-        category: req.body.categories,
-        uploadedBy: req.user.email,
-        publishingCompany: '',
-        bookLanguage: req.body.language,
-        isbn: 0,
-        coverType: '',
-        year: req.body.year,
-        quantity: 1,
-        states: req.body.states,
-        location: req.body.location,
-        contactNumber: req.body.noTel,
-        whatsappLink: req.body.whatsappLink,
-        messengerLink: req.body.messengerLink,
-        wechatLink: req.body.wechatLink,
-        instagramLink: req.body.instagramLink,
-    })
-    newBook.save()
-        .then()
-        .catch((err) => console.log(err))
-    res.redirect('/sellers/dashboard')
+    // //put photo uri to book instance
+    // //put all info to books collection
+    // const newBook = new Book({
+    //     bookTitle: req.body.title,
+    //     coverImgUri: coverImageUri,
+    //     imageUri: imgUri,
+    //     coverImgId: coverImageId,
+    //     imageId: imgID,
+    //     price: req.body.price,
+    //     description: req.body.description,
+    //     category: req.body.categories,
+    //     uploadedBy: req.user.email,
+    //     publishingCompany: '',
+    //     bookLanguage: req.body.language,
+    //     isbn: 0,
+    //     coverType: '',
+    //     year: req.body.year,
+    //     quantity: 1,
+    //     states: req.body.states,
+    //     location: req.body.location,
+    //     contactNumber: req.body.noTel,
+    //     whatsappLink: req.body.whatsappLink,
+    //     messengerLink: req.body.messengerLink,
+    //     wechatLink: req.body.wechatLink,
+    //     instagramLink: req.body.instagramLink,
+    // })
+    // newBook.save()
+    //     .then()
+    //     .catch((err) => console.log(err))
+    // res.redirect('/sellers/dashboard')
+    try {
+        const newFiles = [];
+        if (req.files.coverImg) {
+            newFiles.push(req.files.coverImg[0]);
+        }
+        if (req.files.img1) {
+            newFiles.push(req.files.img1[0]);
+        }
+        if (req.files.img2) {
+            newFiles.push(req.files.img2[0]);
+        }
+
+        let imgUri = []
+        let imgID = []
+
+        for (let i = 0; i < newFiles.length; i++) {
+            var result = await (cloudinary.uploader.upload(newFiles[i].path))
+            imgUri.push(result.secure_url)
+            imgID.push(result.public_id)
+            // results.push(result)
+        }
+        const coverImageUri = imgUri.shift()
+        const coverImageId = imgID.shift()
+console.log(req.body, req.user)
+        //put photo uri to book instance
+        //put all info to books collection
+        const newBook = new Book({
+            bookTitle: req.body.title,
+            coverImgUri: coverImageUri,
+            imageUri: imgUri,
+            coverImgId: coverImageId,
+            imageId: imgID,
+            price: req.body.price,
+            description: req.body.description,
+            category: req.body.categories,
+            uploadedBy: req.user.email,
+            publishingCompany: '',
+            bookLanguage: req.body.language,
+            isbn: 0,
+            coverType: '',
+            year: req.body.year,
+            quantity: 1,
+            states: req.body.states,
+            location: req.body.location,
+            contactNumber: req.body.contactNumber,
+            whatsappLink: req.body.whatsappLink,
+            messengerLink: req.body.messengerLink,
+            wechatLink: req.body.wechatLink,
+            instagramLink: req.body.instagramLink,
+        })
+        
+        console.log(newBook)
+        newBook.save()
+            .then(() => {
+                res.send('ok')
+            })
+            .catch((err) => console.log(err))
+    } catch (err) {
+        console.log(err);
+    }
 })
 
 /**

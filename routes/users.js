@@ -19,49 +19,57 @@ router.get('/login', (req, res) => {
 
 router.put("/:id", upload.single("image"), async (req, res) => {
     try {
-      let user = await User.findById(req.params.id);
-      // Delete image from cloudinary
-      await cloudinary.uploader.destroy(user.cloudinary_id);
-      // Upload image to cloudinary
-      let result;
-      if (req.file) {
-        result = await cloudinary.uploader.upload(req.file.path);
-      }
-      const data = {
-        name: req.body.name || user.name,
-        avatar: result?.secure_url || user.avatar,
-        cloudinary_id: result?.public_id || user.cloudinary_id,
-      };
-      user = await User.findByIdAndUpdate(req.params.id, data, { new: true });
-      res.json(user);
+        let user = await User.findById(req.params.id);
+        // Delete image from cloudinary
+        await cloudinary.uploader.destroy(user.cloudinary_id);
+        // Upload image to cloudinary
+        let result;
+        if (req.file) {
+            result = await cloudinary.uploader.upload(req.file.path);
+        }
+        const data = {
+            name: req.body.name || user.name,
+            avatar: result?.secure_url || user.avatar,
+            cloudinary_id: result?.public_id || user.cloudinary_id,
+        };
+        user = await User.findByIdAndUpdate(req.params.id, data, { new: true });
+        res.json(user);
     } catch (err) {
-      console.log(err);
+        console.log(err);
     }
-  });
+});
 
 router.get('/logout', (req, res) => {
     req.logout()
-    req.flash('success_msg', 'You are logged out')
-    res.redirect('/users/login');
+    res.json({ msg: 'logged out' })
 })
 
 router.get('/register', (req, res) => {
     res.render('index/register')
 })
 
-router.post('/changeAvatar',upload.single("image"), async (req, res)=>{
+router.get('/checkIsLoggedIn', (req, res) => {
+    console.log(req.session)
+    if (req.user) {
+        res.json({statusCode: '200', user: req.user})
+    } else {
+        res.send({statusCode: '401'})
+    }
+})
+
+router.post('/changeAvatar', upload.single("image"), async (req, res) => {
 
     try {
         let user = await User.findById(req.user._id);
         // Delete image from cloudinary
-        if(user.cloudinaryId){
+        if (user.cloudinaryId) {
             await cloudinary.uploader.destroy(user.cloudinaryId);
         }
-        
+
         // Upload image to cloudinary
         let result;
         if (req.file) {
-          result = await cloudinary.uploader.upload(req.file.path);
+            result = await cloudinary.uploader.upload(req.file.path);
         }
         const data = {
             avatarUri: result?.secure_url || user.avatarUri,
@@ -70,74 +78,106 @@ router.post('/changeAvatar',upload.single("image"), async (req, res)=>{
         user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
 
         res.redirect('/')
-      } catch (err) {
+    } catch (err) {
         console.log(err);
-      }
+    }
+})
+
+router.get('/retrieveInfo', (req, res)=>{
+    res.json(req.user)
 })
 
 router.post('/register', (req, res) => {
-    const { first_name, last_name, email, password, password2, gender, states, location } = req.body
-    let errors = []
+    User.findOne({
+        email: req.body.email
+    })
+        .then((user) => {
+            if (!user) {
 
-    if (!first_name || !last_name || !email || !gender|| states == '' || location == '' || !password || !password2)
-        errors.push({ msg: 'Please enter all fields' })
+                const newUser = new User({
+                    firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, password: req.body.password
+                })
+                bcrypt.genSalt(10, function (err, salt) {
+                    if (err) throw err
 
-    if (password !== password2)
-        errors.push({ msg: 'Password do not match' })
-
-    if (password.length < 8) {
-        errors.push({ msg: 'Password should be at least 8 characters' })
-    }
-
-    // if ((noIC.length != 12 && noIC != "")) {
-    //     errors.push({ msg: 'IC format incorrect' })
-    // }
-
-    if (errors.length > 0) {
-        res.render('index/register', {
-            errors, first_name, last_name, email, password, password2, gender, states, location
-        })
-    } else {
-        User.findOne({
-            email: email
-        })
-            .then((user) => {
-                if (!user) {
-
-                    const newUser = new User({
-                        firstName: first_name, lastName: last_name, email, password, gender, states, location
-                    })
-                    bcrypt.genSalt(10, function (err, salt) {
+                    bcrypt.hash(newUser.password, salt, function (err, hash) {
                         if (err) throw err
 
-                        bcrypt.hash(newUser.password, salt, function (err, hash) {
-                            if (err) throw err
-
-                            newUser.password = hash
-                            newUser.save()
-                                .then((users) => {
-                                    req.flash('success_msg', 'You are now registered!')
-
-                                    res.redirect('/users/login')
-                                })
-                                .catch(err => console.log(err))
-                        });
+                        newUser.password = hash
+                        newUser.save()
+                            .then((users) => {
+                                res.sendStatus(200)
+                            })
+                            .catch(err => console.log(err))
                     });
-                    const newSeller = new Seller({
-                        email: email
-                    })
-                    newSeller.save()
-                        .then()
-                        .catch(err => console.log(err))
-                } else {
-                    errors.push({ msg: 'User existed. Please Login' })
-                    res.render('index/register', {
-                        errors, first_name, last_name, email, password, password2, gender, states, location
-                    })
-                }
-            })
-            .catch(err => console.log(err))
-    }
+                });
+            } else {
+                res.json({ msg: "User registered!" })
+            }
+        })
+        .catch(err => console.log(err))
+    // const { first_name, last_name, email, password, password2, gender, states, location } = req.body
+    // let errors = []
+
+    // if (!first_name || !last_name || !email || !gender|| states == '' || location == '' || !password || !password2)
+    //     errors.push({ msg: 'Please enter all fields' })
+
+    // if (password !== password2)
+    //     errors.push({ msg: 'Password do not match' })
+
+    // if (password.length < 8) {
+    //     errors.push({ msg: 'Password should be at least 8 characters' })
+    // }
+
+    // // if ((noIC.length != 12 && noIC != "")) {
+    // //     errors.push({ msg: 'IC format incorrect' })
+    // // }
+
+    // if (errors.length > 0) {
+    //     res.render('index/register', {
+    //         errors, first_name, last_name, email, password, password2, gender, states, location
+    //     })
+    // } else {
+    //     User.findOne({
+    //         email: email
+    //     })
+    //         .then((user) => {
+    //             if (!user) {
+
+    //                 const newUser = new User({
+    //                     firstName: first_name, lastName: last_name, email, password, gender, states, location
+    //                 })
+    //                 bcrypt.genSalt(10, function (err, salt) {
+    //                     if (err) throw err
+
+    //                     bcrypt.hash(newUser.password, salt, function (err, hash) {
+    //                         if (err) throw err
+
+    //                         newUser.password = hash
+    //                         newUser.save()
+    //                             .then((users) => {
+    //                                 req.flash('success_msg', 'You are now registered!')
+
+    //                                 res.redirect('/users/login')
+    //                             })
+    //                             .catch(err => console.log(err))
+    //                     });
+    //                 });
+    //                 const newSeller = new Seller({
+    //                     email: email
+    //                 })
+    //                 newSeller.save()
+    //                     .then()
+    //                     .catch(err => console.log(err))
+    //             } else {
+    //                 errors.push({ msg: 'User existed. Please Login' })
+    //                 res.render('index/register', {
+    //                     errors, first_name, last_name, email, password, password2, gender, states, location
+    //                 })
+    //             }
+    //         })
+    //         .catch(err => console.log(err))
+    // }
 })
 
 router.post('/setting', (req, res) => {
@@ -292,11 +332,16 @@ router.post('/changePassword', (req, res) => {
 
 router.post('/login', (req, res, next) => {
 
-    passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/users/login',
-        failureFlash: true
-    })(req, res, next)
+    // passport.authenticate('local', {
+    //     successRedirect: '/',
+    //     failureRedirect: '/users/login',
+    //     failureFlash: true
+    // })(req, res, next)
+
+    passport.authenticate('local')(req, res, () => {
+        res.cookie('keyboard cat.', { secure: true, signed: true, expires: new Date(Date.now() + 3600) });
+        res.sendStatus(200)
+    })
 })
 
 module.exports = router

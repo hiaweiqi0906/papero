@@ -92,6 +92,37 @@ router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (
   res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
 })
 
+router.get('/search=:searchResults', async (req, res) => {
+ 
+  let skip = (req.params.currentPage - 1) * 10
+  let result = await conn.db.collection("books").aggregate([
+    {
+      '$search': {
+        'index': 'book_index',
+        'text': {
+          'query': `${req.params.searchResults}`,
+          'path': {
+            'wildcard': '*'
+          }
+        }
+      },
+    }
+  ]).toArray()
+  res.json(result)
+// res.send(result)
+  // res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
+})
+
+router.get('/allBooks', (req, res)=>{
+  Book
+        .find()
+        .sort({ uploadedAt: 'desc' })
+        .exec(function (err, doc) {
+            if (err) console.log(err)
+            res.json(doc)
+        });
+})
+
 router.post('/search', async (req, res) => {
   let skip = (req.params.currentPage - 1) * 10
   let result = await conn.db.collection("books").aggregate([
@@ -127,21 +158,32 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/view/:bookID', (req, res) => {
-  console.log(req.params.bookID)
-  if (req.user) {
+  // console.log(req.params.bookID)
+  // if (req.user) {
 
-  }
+  // }
+  // Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, (err, book) => {
+  //   if (err) console.log(err);
+  //   let files = [book.coverImgUri]
+
+  //   // let allCoverImgUri = [ new mongoose.Types.ObjectId(book.coverImgUri) ]
+  //   for (let i = 0; i < book.imageUri.length; i++) {
+  //     files.push(book.imageUri[i])
+  //   }
+  //   res.render("index/info", { user: req.user, books: book, files: files });
+
+  // })
   Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, (err, book) => {
     if (err) console.log(err);
     let files = [book.coverImgUri]
 
     // let allCoverImgUri = [ new mongoose.Types.ObjectId(book.coverImgUri) ]
     for (let i = 0; i < book.imageUri.length; i++) {
-      files.push(book.imageUri[i])
+        files.push(book.imageUri[i])
     }
-    res.render("index/info", { user: req.user, books: book, files: files });
-
-  })
+    //   res.render("index/info", { user: req.user, books: book, files: files });
+    res.send(book)
+})
 })
 
 router.get('/favourite', (req, res) => {

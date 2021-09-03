@@ -8,33 +8,33 @@ const bookIdUri = mongoose.Schema({ name: String });
 const BookSchema = mongoose.Schema({
     bookTitle:{
         type: String,
-        required: true,
+        // required: true,
     },
     coverImgUri:{
         type: String,
-        required: true,
+        // required: true,
     },
     imageUri:{
         type: Array,
     },
     coverImgId:{
         type: String,
-        required: true,
+        // required: true,
     },
     imageId:{
         type: Array,
     },
     price:{
         type: Number,
-        required: true
+        // required: true
     },
     description:{
         type: String,
-        required: true,
+        // required: true,
     }, 
     category:{
         type: String,
-        required: true,
+        // required: true,
         // Comics & Manga
         // Children's Books
         // Agriculture, Forestry & Fishery
@@ -69,11 +69,11 @@ const BookSchema = mongoose.Schema({
     },
     uploadedBy:{
         type: String,
-        required: true,
+        // required: true,
     },
     uploadedAt:{
         type: Date,
-        require: true,
+        // require: true,
         default: Date.now
     },
     publishingCompany:{
@@ -81,7 +81,7 @@ const BookSchema = mongoose.Schema({
     },
     bookLanguage:{
         type: String,
-        required: true,
+        // required: true,
     },
     isbn:{
         type: Number,
@@ -91,18 +91,18 @@ const BookSchema = mongoose.Schema({
     },
     year:{
         type: Number,
-        required: true,
+        // required: true,
     },
     quantity:{
         type: Number,
     },
     states:{
         type: String,
-        required: true,
+        // required: true,
     },
     location:{
         type: String,
-        required: true,
+        // required: true,
     },
     contactNumber:{
         type: Long,

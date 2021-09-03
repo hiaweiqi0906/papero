@@ -8,6 +8,7 @@ const passport = require('passport')
 const path = require('path')
 const crypto = require('crypto')
 const multer = require('multer')
+const cors = require('cors')
 const { GridFsStorage } = require('multer-gridfs-storage')
 const Grid = require('gridfs-stream')
 const methodOverride = require('method-override')
@@ -25,6 +26,10 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 app.use('/public', express.static(path.join(__dirname, 'public')))
+app.use(cors({
+  origin: "http://localhost:3000", // <-- location of the react app were connecting to
+  credentials: true,
+}))
 require('./config/passport')(require('passport'))
 
 //mongodb stuff
@@ -53,7 +58,7 @@ app.use(express.urlencoded({ extended: false }))
 
 //session middleware
 app.use(session({
-  secret: 'secret',
+  secret: 'keyboard cat.',
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -223,7 +228,7 @@ app.post('/testupload', upload.fields([{ //upload pic to db
   }
 });
 //set up port and listen to port
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
