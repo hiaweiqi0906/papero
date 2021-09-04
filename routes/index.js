@@ -57,6 +57,10 @@ router.get('/haha/:searchResults/:currentPage', async (req, res) => {
   res.send(result)
 })
 
+router.get('/trySearch', (req, res)=>{
+  console.log(req.params)
+})
+
 router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (req, res) => {
   // Book
   //   .find({$text: {$search: req.params.searchResults}})
@@ -92,9 +96,30 @@ router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (
   res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
 })
 
-router.get('/search=:searchResults', async (req, res) => {
+// router.get('/search=:searchResults', async (req, res) => {
  
-  let skip = (req.params.currentPage - 1) * 10
+//   let skip = (req.params.currentPage - 1) * 10
+//   let result = await conn.db.collection("books").aggregate([
+//     {
+//       '$search': {
+//         'index': 'book_index',
+//         'text': {
+//           'query': `${req.params.searchResults}`,
+//           'path': {
+//             'wildcard': '*'
+//           }
+//         }
+//       },
+//     }
+//   ]).toArray()
+//   res.json(result)
+// // res.send(result)
+//   // res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
+// })
+
+router.get('/search=:searchResults&page=:page', async (req, res) => {
+ 
+  let skip = (req.params.page - 1) * 10
   let result = await conn.db.collection("books").aggregate([
     {
       '$search': {
@@ -105,22 +130,31 @@ router.get('/search=:searchResults', async (req, res) => {
             'wildcard': '*'
           }
         }
-      },
-    }
+      }
+    }, {
+        '$skip': skip
+      }, {
+        '$limit': 10
+      }
   ]).toArray()
+  console.log(result)
   res.json(result)
 // res.send(result)
   // res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
 })
 
-router.get('/allBooks', (req, res)=>{
+router.get('/allBooks&page=:page', (req, res)=>{
   Book
         .find()
         .sort({ uploadedAt: 'desc' })
+        .skip((req.params.page-1)*10)
+        .limit(10)   
         .exec(function (err, doc) {
             if (err) console.log(err)
             res.json(doc)
-        });
+        })
+        
+        ;
 })
 
 router.post('/search', async (req, res) => {

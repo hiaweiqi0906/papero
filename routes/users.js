@@ -1,14 +1,31 @@
-const express = require('express')
-const router = express.Router()
-const bcrypt = require('bcryptjs')
+// const express = require('express')
+// const router = express.Router()
+// const bcrypt = require('bcryptjs')
+// const passport = require('passport')
+// const User = require('../models/User')
+// const upload = require('../utils/multer')
+// const cloudinary = require("../utils/cloudinary");
+
+const express = require("express");
+const router = express.Router();
+const bcrypt = require("bcryptjs");
 const passport = require('passport')
 const { ensureAuthenticated } = require('../config/auth')
+const path = require('path')
+const mongoose = require('mongoose')
+const crypto = require('crypto')
+const multer = require('multer')
+const { GridFsStorage } = require('multer-gridfs-storage')
+const Grid = require('gridfs-stream')
+const methodOverride = require('method-override')
+const bodyParser = require('body-parser')
+const db = require('../config/keys').MongoURI;
 const Seller = require('../models/Seller')
 const User = require('../models/User')
+const Book = require('../models/Book')
+const dotenv = require('dotenv')
 const upload = require('../utils/multer')
 const cloudinary = require("../utils/cloudinary");
-
-
 router.get('/login', (req, res) => {
     if (req.user) {
         res.redirect('/')
@@ -49,11 +66,10 @@ router.get('/register', (req, res) => {
 })
 
 router.get('/checkIsLoggedIn', (req, res) => {
-    console.log(req.session)
     if (req.user) {
-        res.json({statusCode: '200', user: req.user})
+        res.json({ statusCode: '200', user: req.user })
     } else {
-        res.send({statusCode: '401'})
+        res.send({ statusCode: '401' })
     }
 })
 
@@ -77,13 +93,13 @@ router.post('/changeAvatar', upload.single("image"), async (req, res) => {
         };
         user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
 
-        res.redirect('/')
+        console.log(req.body)
     } catch (err) {
         console.log(err);
     }
 })
 
-router.get('/retrieveInfo', (req, res)=>{
+router.get('/retrieveInfo', (req, res) => {
     res.json(req.user)
 })
 
@@ -181,117 +197,95 @@ router.post('/register', (req, res) => {
 })
 
 router.post('/setting', (req, res) => {
-    let errors = []
-    const {
-        first_name,
-        last_name,
-        noIC,
-        email,
-        password,
-        password2,
-        gender,
-        noTel,
-        states,
-        location,
-        whatsappLink,
-        messengerLink,
-        wechatLink,
-        instagramLink } = req.body
+    console.log('here', req.body)
+    console.log(req.body)
+    // let errors = []
+    // const {
+    //     firstName,
+    //     lastName,
+    //     email,
+    //     gender,
+    //     noTel,
+    //     states,
+    //     location,
+    //     whatsappLink,
+    //     messengerLink,
+    //     wechatLink,
+    //     instagramLink } = req.body
 
-    if (!first_name || !last_name || !email || !gender || !noTel || states == '' || location == '')
-        errors.push({ msg: 'Please enter all required fields' })
-    if (errors.length > 0) {
-        res.render('index/setting', {
-            errors, user: req.user
-        })
-        // if ((password !== password2) && password2 != '')
-        //     errors.push({ msg: 'Password do not match' })
-    }
-    if (req.user.email != email) {
-        User.findOne({ email: email }, function (err, user) {
-            if (err) throw err
-            if (user) {
-                errors.push({ msg: 'User existed. Please try again' })
-                res.render('index/setting', {
-                    errors, user: req.user
-                })
-            }
-            else {
-                User.findOneAndUpdate({ email: req.user.email }, {
-                    firstName: first_name,
-                    lastName: last_name,
-                    email: email,
-                    gender: gender,
-                    noTel: noTel,
-                    states: states,
-                    location: location,
-                    whatsappLink: whatsappLink,
-                    messengerLink: messengerLink,
-                    wechatLink: wechatLink,
-                    instagramLink: instagramLink
-                    // ,
-                    // avatarUri:{
-                    //     type:String
-                    // }
+    // if (req.user.email != email) {
+    //     User.findOne({ email: email }, function (err, user) {
+    //         if (err) throw err
+    //         if (user) {
+    //             errors.push({ msg: 'User existed. Please try again' })
+    //             res.json({msg:'User Existed'})
+    //         }
+    //         else {
+    //             User.findOneAndUpdate({ email: req.user.email }, {
+    //                 firstName: firstName,
+    //                 lastName: lastName,
+    //                 email: email,
+    //                 gender: gender,
+    //                 noTel: noTel,
+    //                 states: states,
+    //                 location: location,
+    //                 whatsappLink: whatsappLink,
+    //                 messengerLink: messengerLink,
+    //                 wechatLink: wechatLink,
+    //                 instagramLink: instagramLink
 
-                }, (err, doc) => {
-                    if (err) throw err
-                    else {
-                        req.user.email = email
-                        console.log(req.user.email)
-                        res.redirect('/sellers/setting')
-                    }
-                })
+    //             }, (err, doc) => {
+    //                 if (err) throw err
+    //                 else {
+    //                     req.user.email = email
+    //                     console.log(req.user.email)
+    //                     res.json({msg:'Updated'})
 
-            }
-        })
-    } else if (req.user.email == email) {
-        User.findOneAndUpdate({ email: req.user.email }, {
-            firstName: first_name,
-            lastName: last_name,
-            gender: gender,
-            noTel: noTel,
-            states: states,
-            location: location,
-            whatsappLink: whatsappLink,
-            messengerLink: messengerLink,
-            wechatLink: wechatLink,
-            instagramLink: instagramLink
-            // ,
-            // avatarUri:{
-            //     type:String
-            // }
-        }, (err, doc) => {
-            if (err) throw err
-            else {
-                res.redirect('/sellers/setting')
-            }
-        })
+    //                 }
+    //             })
+
+    //         }
+    //     })
+    // } else if (req.user.email == email) {
+    //     User.findOneAndUpdate({ email: req.user.email }, {
+    //         firstName: firstName,
+    //         lastName: lastName,
+    //         gender: gender,
+    //         noTel: noTel,
+    //         states: states,
+    //         location: location,
+    //         whatsappLink: whatsappLink,
+    //         messengerLink: messengerLink,
+    //         wechatLink: wechatLink,
+    //         instagramLink: instagramLink
+    //         // ,
+    //         // avatarUri:{
+    //         //     type:String
+    //         // }
+    //     }, (err, doc) => {
+    //         if (err) throw err
+    //         else {
+    //             res.json({msg:'Updated'})
+    //         }
+    //     })
 
 
-    }
+    // }
 
-    //console.log(req.body)
+
+})
+
+router.post('/getsetting', (req, res) => {
+    console.log('haha', req.body)
+    res.send(req.body)
 })
 
 router.post('/changePassword', (req, res) => {
     //check 3 new fields entered?
     const oldPassword = req.body.oldPassword
     const newPassword1 = req.body.newPassword1
-    const newPassword2 = req.body.newPassword2
-    let errors = []
 
-    if (!oldPassword || !newPassword1 || !newPassword2)
-        errors.push({ msg: 'Please enter all required fields' })
-    //check new passwords same?
-    if (newPassword1 != newPassword2)
-        errors.push({ msg: 'Passwords do not match' })
-
-    if (errors.length > 0) {
-        res.render('index/setting', {
-            errors, user: req.user
-        })
-    } else {
+    
         //get old password from db
         // let user = await User.findById(req.user._id);
         //compare old password
@@ -310,22 +304,19 @@ router.post('/changePassword', (req, res) => {
                             if (err) throw err
                             else {
                                 req.user.password = hash
-                                res.redirect('/sellers/setting')
+                                res.send({msg: 'Password Changed'})
                             }
                         })
                     });
                 });
             } else {
-                errors.push({ msg: 'Password incorrect. Please try again.' })
-                res.render('index/setting', {
-                    errors, user: req.user
-                })
+                res.send({msg: 'Password Incorrect'})
             }
 
             // update in db
             // else return error msg + redirect
         });
-    }
+    
 
 
 })
