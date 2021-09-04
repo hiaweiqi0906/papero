@@ -53,7 +53,7 @@ app.set("view engine", "ejs");
 
 
 //body-parser
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 
 
 //session middleware
@@ -81,7 +81,7 @@ app.use(function (req, res, next) {
   next()
 })
 
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(methodOverride('_method'))
 
 //routers
