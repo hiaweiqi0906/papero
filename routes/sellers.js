@@ -77,7 +77,6 @@ router.get("/dashboard", ensureAuthenticated, async (req, res) => {
 
 
 router.get('/testLogin', (req, res) => {
-    console.log(req.session)
     if (req.user) {
         res.sendStatus(200)
     } else {
@@ -105,7 +104,6 @@ router.post('/test', upload.single("coverImg"), async (req, res) => {
             // Delete image from cloudinary
 
             if (user.cloudinaryID) {
-                console.log(user.cloudinaryID)
                 await cloudinary.uploader.destroy(user.cloudinaryID);
             }
 
@@ -114,7 +112,6 @@ router.post('/test', upload.single("coverImg"), async (req, res) => {
                 avatarUri: result?.secure_url || user.avatarUri,
                 cloudinaryID: result?.public_id || user.cloudinaryID,
             };
-            console.log(data)
             user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
         }
 
@@ -155,7 +152,6 @@ router.post('/test', upload.single("coverImg"), async (req, res) => {
                         if (err) throw err
                         else {
                             req.user.email = email
-                            console.log(req.user.email)
                             res.send({ msg: 'Updated' })
 
                         }
@@ -316,7 +312,6 @@ router.post('/upload', upload.fields([{ //upload pic to db
         }
         const coverImageUri = imgUri.shift()
         const coverImageId = imgID.shift()
-        console.log(req.body, req.user)
         //put photo uri to book instance
         //put all info to books collection
         const newBook = new Book({
@@ -344,7 +339,6 @@ router.post('/upload', upload.fields([{ //upload pic to db
             instagramLink: req.body.instagramLink,
         })
 
-        console.log(newBook)
         newBook.save()
             .then(() => {
                 res.send('ok')
@@ -369,6 +363,11 @@ router.get("/register", (req, res) => {
     }
 });
 
+// router.post('/edit/:bookId', (req, res)=>{
+//     console.log(req.body)
+//     res.send({statusCode: '200'})
+// })
+
 router.post('/edit/:bookID', upload.fields([{ //upload pic to db
     name: 'coverImg', maxCount: 1
 }, {
@@ -378,119 +377,150 @@ router.post('/edit/:bookID', upload.fields([{ //upload pic to db
 }, {
     name: 'img3', maxCount: 1
 }]), async (req, res) => {
-
     //check if 
     Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, async (err, book) => {
-
+        
         if (err) console.log(err);
-        let imgUri = []
-        let imgID = []
-        let result
-        if (req.files.coverImg) {
-            //upload new
-            result = await (cloudinary.uploader.upload(req.files.coverImg[0].path))
+        if(req.files){
+            let imgUri = []
+            let imgID = []
+            let result
+            if (req.files.coverImg) {
+                //upload new
+                result = await (cloudinary.uploader.upload(req.files.coverImg[0].path))
+    
+                //delete old
+                await cloudinary.uploader.destroy(book.coverImgId)
+    
+                //push result img Id
+                //push result img Uri
+                imgUri.push(result.secure_url)
+                imgID.push(result.public_id)
+                // removeId.push(new mongoose.Types.ObjectId(book.coverImgUri));
+            } else {
+                //push old img Id
+                //push old img Uri
+                imgUri.push(book.coverImgUri)
+                imgID.push(book.coverImgId)
+            }
+    
+            if (req.files.img1) {
+                //if got old, 
+                //delete old
+                if (book.imageUri[0]) await cloudinary.uploader.destroy(book.imageId[0])
+                //upload new
+                result = await (cloudinary.uploader.upload(req.files.img1[0].path))
+                //push result img Id
+                //push result img Uri
+                imgUri.push(result.secure_url)
+                imgID.push(result.public_id)
+            } else {
+                //if got old
+                //push old img Id
+                //push old img Uri
+                if (book.imageUri[0]) imgUri.push(book.imageUri[0]);
+            }
+    
+            if (req.files.img2) {
+                //if got old, 
+                //delete old
+                if (book.imageUri[1]) await cloudinary.uploader.destroy(book.imageId[1])
+                //upload new
+                result = await (cloudinary.uploader.upload(req.files.img2[0].path))
+                //push result img Id
+                //push result img Uri
+                imgUri.push(result.secure_url)
+                imgID.push(result.public_id)
+            } else {
+                //if got old
+                //push old img Id
+                //push old img Uri
+                if (book.imageUri[1]) imgUri.push(book.imageUri[1]);
+            }
+    
+            if (req.files.img3) {
+                //if got old, 
+                //delete old
+                if (book.imageUri[2]) await cloudinary.uploader.destroy(book.imageId[2])
+                //upload new
+                result = await (cloudinary.uploader.upload(req.files.img3[0].path))
+                //push result img Id
+                //push result img Uri
+                imgUri.push(result.secure_url)
+                imgID.push(result.public_id)
+            } else {
+                //if got old
+                //push old img Id
+                //push old img Uri
+                if (book.imageUri[2]) imgUri.push(book.imageUri[2]);
+            }
+    
+            //check all info entered
+            const coverImgId = imgID.shift()
+            const coverImgUri = imgUri.shift()
+            Book.updateOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) },
+                {
+                    bookTitle: req.body.bookTitle,
+                    coverImgUri: coverImgUri,
+                    imageUri: imgUri,
+                    coverImgId: coverImgId,
+                    imageId: imgID,
+                    price: req.body.price,
+                    description: req.body.description,
+                    category: req.body.category,
+                    uploadedBy: req.user.email,
+                    publishingCompany: '',
+                    language: req.body.bookLanguage,
+                    isbn: 0,
+                    coverType: '',
+                    year: req.body.year,
+                    quantity: 1,
+                    states: req.body.states,
+                    location: req.body.location,
+                    contactNumber: req.body.noTel,
+                    whatsappLink: req.body.whatsappLink,
+                    messengerLink: req.body.messengerLink,
+                    wechatLink: req.body.wechatLink,
+                    instagramLink: req.body.instagramLink,
+                }, function (err, docs) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        res.send({msg: 'Book Updated'})
+                    }
+                });
 
-            //delete old
-            await cloudinary.uploader.destroy(book.coverImgId)
-
-            //push result img Id
-            //push result img Uri
-            imgUri.push(result.secure_url)
-            imgID.push(result.public_id)
-            // removeId.push(new mongoose.Types.ObjectId(book.coverImgUri));
-        } else {
-            //push old img Id
-            //push old img Uri
-            imgUri.push(book.coverImgUri)
-            imgID.push(book.coverImgId)
+        }else{
+            Book.updateOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) },
+                {
+                    bookTitle: req.body.bookTitle,
+                    price: req.body.price,
+                    description: req.body.description,
+                    category: req.body.category,
+                    uploadedBy: req.user.email,
+                    publishingCompany: '',
+                    language: req.body.bookLanguage,
+                    isbn: 0,
+                    coverType: '',
+                    year: req.body.year,
+                    quantity: 1,
+                    states: req.body.states,
+                    location: req.body.location,
+                    contactNumber: req.body.contactNumber,
+                    whatsappLink: req.body.whatsappLink,
+                    messengerLink: req.body.messengerLink,
+                    wechatLink: req.body.wechatLink,
+                    instagramLink: req.body.instagramLink,
+                }, function (err, docs) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        res.send({msg: 'Book Updated'})
+                    }
+                });
         }
-
-        if (req.files.img1) {
-            //if got old, 
-            //delete old
-            if (book.imageUri[0]) await cloudinary.uploader.destroy(book.imageId[0])
-            //upload new
-            result = await (cloudinary.uploader.upload(req.files.img1[0].path))
-            //push result img Id
-            //push result img Uri
-            imgUri.push(result.secure_url)
-            imgID.push(result.public_id)
-        } else {
-            //if got old
-            //push old img Id
-            //push old img Uri
-            if (book.imageUri[0]) imgUri.push(book.imageUri[0]);
-        }
-
-        if (req.files.img2) {
-            //if got old, 
-            //delete old
-            if (book.imageUri[1]) await cloudinary.uploader.destroy(book.imageId[1])
-            //upload new
-            result = await (cloudinary.uploader.upload(req.files.img2[0].path))
-            //push result img Id
-            //push result img Uri
-            imgUri.push(result.secure_url)
-            imgID.push(result.public_id)
-        } else {
-            //if got old
-            //push old img Id
-            //push old img Uri
-            if (book.imageUri[1]) imgUri.push(book.imageUri[1]);
-        }
-
-        if (req.files.img3) {
-            //if got old, 
-            //delete old
-            if (book.imageUri[2]) await cloudinary.uploader.destroy(book.imageId[2])
-            //upload new
-            result = await (cloudinary.uploader.upload(req.files.img3[0].path))
-            //push result img Id
-            //push result img Uri
-            imgUri.push(result.secure_url)
-            imgID.push(result.public_id)
-        } else {
-            //if got old
-            //push old img Id
-            //push old img Uri
-            if (book.imageUri[2]) imgUri.push(book.imageUri[2]);
-        }
-
-        //check all info entered
-        const coverImgId = imgID.shift()
-        const coverImgUri = imgUri.shift()
-        Book.updateOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) },
-            {
-                bookTitle: req.body.title,
-                coverImgUri: coverImgUri,
-                imageUri: imgUri,
-                coverImgId: coverImgId,
-                imageId: imgID,
-                price: req.body.price,
-                description: req.body.description,
-                category: req.body.categories,
-                uploadedBy: req.user.email,
-                publishingCompany: '',
-                language: req.body.language,
-                isbn: 0,
-                coverType: '',
-                year: req.body.year,
-                quantity: 1,
-                states: req.body.states,
-                location: req.body.location,
-                contactNumber: req.body.noTel,
-                whatsappLink: req.body.whatsappLink,
-                messengerLink: req.body.messengerLink,
-                wechatLink: req.body.wechatLink,
-                instagramLink: req.body.instagramLink,
-            }, function (err, docs) {
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    res.redirect('/sellers/dashboard')
-                }
-            });
     })
 })
 
@@ -516,7 +546,6 @@ router.get('/:email', (req, res) => {
         if (err) throw (err);
 
         let userAvatar;
-        let booksImg = [];
 
         //search user avatar
         if (!(user.avatarUri)) {
@@ -526,37 +555,7 @@ router.get('/:email', (req, res) => {
             .then()
             .catch()
 
-        let bookCoverImg = [];
-        if (books.length === 0) res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: bookCoverImg });
-        let allImgUri = []
-        books.forEach(function (book) {
-            allImgUri.push((book.coverImgUri))
-        })
-
-        if (allImgUri.length == 0) {
-            res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: false });
-        } else {
-            res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: allImgUri });
-        }
-
-        // conn.db.collection("book-img.files").find({ _id: { $in: allImgUri } }).toArray((err, files) => {
-        //     if (!files || files.length === 0) {
-        //         res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: false });
-        //     } else {
-        //         files.map((file) => {
-        //             if (file.contentType === 'image/png' || file.contentType === 'image/jpeg') {
-        //                 file.isImage = true
-        //             } else {
-        //                 file.isImage = false
-        //             }
-        //         })
-        //         res.render("index/seller_info", { userAvatar: userAvatar, seller: user, user: req.user, books: books, files: files });
-        //     }
-        // })
-
-        //search all books coverImg
-
-        //send to ejs to display
+        res.json({user, books})
     })
 })
 module.exports = router;

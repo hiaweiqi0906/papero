@@ -58,7 +58,6 @@ router.get('/haha/:searchResults/:currentPage', async (req, res) => {
 })
 
 router.get('/trySearch', (req, res)=>{
-  console.log(req.params)
 })
 
 router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (req, res) => {
@@ -137,7 +136,6 @@ router.get('/search=:searchResults&page=:page', async (req, res) => {
         '$limit': 10
       }
   ]).toArray()
-  console.log(result)
   res.json(result)
 // res.send(result)
   // res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
@@ -173,7 +171,6 @@ router.post('/search', async (req, res) => {
 
     }
   ]).toArray()
-  console.log(result.length)
   let newLink = '/search=' + req.body.searchbar + '/page=1/total=' + (Math.ceil(result.length / 10))
   res.redirect(newLink)
 })
@@ -209,26 +206,12 @@ router.get('/view/:bookID', (req, res) => {
   // })
   Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, (err, book) => {
     if (err) console.log(err);
-    let files = [book.coverImgUri]
-
-    // let allCoverImgUri = [ new mongoose.Types.ObjectId(book.coverImgUri) ]
-    for (let i = 0; i < book.imageUri.length; i++) {
-        files.push(book.imageUri[i])
-    }
     //   res.render("index/info", { user: req.user, books: book, files: files });
     res.send(book)
 })
 })
 
-router.get('/favourite', (req, res) => {
-  if (req.user) {
 
-  }
-  Book.find({ _id: { $in: req.user.favouriteUri } }, function (err, docs) {
-    res.render('index/favourite_list', { books: docs, user: req.user })
-  })
-
-})
 router.post('/view/:bookID', (req, res) => {
 
   let oldFavouriteList = req.user.favouriteUri
