@@ -63,6 +63,7 @@ app.use(session({
   secret: 'keyboard cat.',
   resave: true,
   saveUninitialized: true,
+  proxy: true, // add this line
   cookie: {
     secure: true,
     maxAge: 1000 * 60 * 60 * 24,
