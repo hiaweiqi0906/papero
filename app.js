@@ -150,7 +150,7 @@
 // })
 
 // app.post('/test', async (req, res) => {
-  
+
 // const output = `
 // <p>New Request</p>
 // <ul>
@@ -265,12 +265,14 @@ const findOrCreate = require('mongoose-findorcreate')
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcryptjs");
 const session = require('express-session')
+const jwt = require('jsonwebtoken')
 const passport = require('passport')
 const passportLocalMongoose = require('passport-local-mongoose')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('./models/User')
 const cors = require('cors')
+let cookieParser = require('cookie-parser')
 
 // const bcrypt = require('bcrypt')
 // const saltRounds = 10
@@ -279,10 +281,15 @@ const cors = require('cors')
 
 const app = express()
 
+
+
+app.use(cookieParser());
+
 app.use(cors({
-    origin: "http://localhost:3000", // <-- location of the react app were connecting to
-    credentials: true,
+  origin: "http://localhost:3000", // <-- location of the react app were connecting to
+  credentials: true,
 }))
+
 app.enable('trust proxy'); // add this line
 app.set('trust proxy', 1) // trust first proxy
 
@@ -290,27 +297,48 @@ app.use(express.static('public'))
 app.set('view engine', 'ejs')
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-// app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-    secret: 'keyboard cat.',
-    secure: true,
-    resave: true,
-    saveUninitialized: true,
-  proxy: true, // add this line
+// app.use(
+//   jwt({
+//     secret: process.env.TOKEN_SECRET,
+//     getToken: req => req.cookies.authToken
+//   })
+// );
+function verify(req, res, next) {
+  const token = req.cookies.authToken
+  if (!token) return res.status(401).send('Access Denied')
+  try {
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET)
+    req.user = verified;
+    next()
+  } catch (err) {
+    res.status(400).send('Invalid Token')
+  }
+}
 
-    cookie: {
-        secure: true,
-        maxAge: 1000 * 60 * 60 * 24,
-        // store: new MongoStore({ mongoUrl: db })
-        // store: MongoStore.create({ mongoUrl: db })
-      }
+app.get('/printjwt', verify, (req, res) => {
+  console.log(req.cookies, req.user)
+  res.send(req.user)
+  
+})
+
+app.use(session({
+  secret: 'keyboard cat.',
+  resave: true,
+  saveUninitialized: true,
+  proxy: true, // add this line
+  cookie: {
+    secure: true,
+    maxAge: 1000 * 60 * 60 * 24,
+    // store: new MongoStore({ mongoUrl: db })
+    // store: MongoStore.create({ mongoUrl: db })
+  }
 }))
 
 app.use(passport.initialize())
 app.use(passport.session())
 
 const db = require('./config/keys').MongoURI;
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {
     console.log("successfully connected to db");
   })
@@ -321,192 +349,199 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true})
 passport.use(User.createStrategy());
 
 passport.serializeUser(function (user, done) {
-    return done(null, user.id);
+  return done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
-    User.findById(id, function (err, user) {
-        return done(err, user);
-    });
+  User.findById(id, function (err, user) {
+    return done(err, user);
+  });
 });
 
 passport.use(
-    new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
-      //Match user
-      User.findOne({ email: email })
-        .then((user) => {
-          if (!user) {
-            return done(null, false, { message: "That email is not registered" });
-          }
+  new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
+    //Match user
+    User.findOne({ email: email })
+      .then((user) => {
+        if (!user) {
+          return done(null, false, { message: "That email is not registered" });
+        }
 
-          bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) throw err;
-            if (isMatch) {
-              return done(null, user);
-            } else {
-              return done(null, false, { message: "Password incorrect" });
-            }
-          });
-        })
-        .catch((err) => console.log(err));
-    })
-  );
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+          if (err) throw err;
+          if (isMatch) {
+            return done(null, user);
+          } else {
+            return done(null, false, { message: "Password incorrect" });
+          }
+        });
+      })
+      .catch((err) => console.log(err));
+  })
+);
 
 passport.use(new GoogleStrategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
-    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: "http://localhost:3000/auth/google/secrets",
+  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
-    function (accessToken, refreshToken, profile, cb) {
-        User.findOrCreate({ googleId: profile.id }, function (err, user) {
-            if (err) console.log(err)
-            return cb(err, user);
-        });
-    }
+  function (accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      if (err) console.log(err)
+      return cb(err, user);
+    });
+  }
 ));
 
 passport.use(new FacebookStrategy({
-    clientID: process.env.FACEBOOK_APP_ID,
-    clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "http://localhost:3000/auth/facebook/secrets"
+  clientID: process.env.FACEBOOK_APP_ID,
+  clientSecret: process.env.FACEBOOK_APP_SECRET,
+  callbackURL: "http://localhost:3000/auth/facebook/secrets"
 },
-    function (accessToken, refreshToken, profile, cb) {
-        User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-            if(err) console.log(err);
-            return cb(err, user);
-        });
-    }
+  function (accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+      if (err) console.log(err);
+      return cb(err, user);
+    });
+  }
 ));
 
 app.get('/', (req, res) => {
-    res.render('home')
+  res.render('home')
 })
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }))
 
 app.get('/auth/google/secrets',
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    function (req, res) {
-        // Successful authentication, redirect home.
-        res.redirect('/secrets');
-    });
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/secrets');
+  });
 
 app.get('/auth/facebook',
-    passport.authenticate('facebook'));
+  passport.authenticate('facebook'));
+
 
 app.get('/auth/facebook/secrets',
-    passport.authenticate('facebook', { failureRedirect: '/login' }),
-    function (req, res) {
-        // Successful authentication, redirect home.
-        res.redirect('/secrets');
-    });
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/secrets');
+  });
 
 app.get('/login', (req, res) => {
-    res.render('login')
+  res.render('login')
 })
 
-app.get('/isLoggedIn', (req, res)=>{
+app.get('/isLoggedIn', verify, (req, res) => {
+
   console.log(req.session)
-    res.send(req.user)
+  res.send(req.user)
 })
 
 app.post('/login', (req, res) => {
- 
-    const user = new User({
-        email: req.body.username,
-        password: req.body.password
-    })
 
-        passport.authenticate('local')(req, res, () => {
-          console.log(req.session)
-            res.send('ok')
-            // res.redirect('/secrets')
-        }) 
-   
+  const user = new User({
+    email: req.body.username,
+    password: req.body.password
+  })
 
-    // req.login(user, (err) => {
-    //     if (err) console.log(err)
-    //     else {
-    //         passport.authenticate('local')(req, res, () => {
-    //             res.send('ok')
-    //             // res.redirect('/secrets')
-    //         })
-    //     }
-    // })
-    // User.findOne({email: req.body.username}, (err, user)=>{
-    //     if(err) console.log(err);
-    //     else{
-    //         if(user) {
-    //             bcrypt.compare(req.body.password, user.password, function(err, result) {
-    //                 err ? console.log(err) : console.log();
-    //                 result ? res.render('secrets') : res.render('login')
-    //             });
+  passport.authenticate('local')(req, res, () => {
+    console.log(req.session)
+    //create token
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET)
+    res.cookie("authToken", token, { expire: new Date() + 9999, httpOnly: true });
+    res.header('authToken', token).send(token)
+    // res.redirect('/secrets')
+  })
 
-    //         }
-    //         else res.render('login')
-    //     }
-    // })
+
+  // req.login(user, (err) => {
+  //     if (err) console.log(err)
+  //     else {
+  //         passport.authenticate('local')(req, res, () => {
+  //             res.send('ok')
+  //             // res.redirect('/secrets')
+  //         })
+  //     }
+  // })
+  // User.findOne({email: req.body.username}, (err, user)=>{
+  //     if(err) console.log(err);
+  //     else{
+  //         if(user) {
+  //             bcrypt.compare(req.body.password, user.password, function(err, result) {
+  //                 err ? console.log(err) : console.log();
+  //                 result ? res.render('secrets') : res.render('login')
+  //             });
+
+  //         }
+  //         else res.render('login')
+  //     }
+  // })
 })
 
 app.get('/register', (req, res) => {
-    res.render('register')
+  res.render('register')
 })
 
 app.get('/logout', (req, res) => {
-    req.logout()
-    res.redirect('/')
+  req.logout()
+  res.clearCookie('authToken');
+
+  res.redirect('/')
 })
 
 app.get('/secrets', (req, res) => {
-    if (req.isAuthenticated()) {
-        res.render('secrets')
-    } else {
-        res.redirect('/login')
-    }
+  if (req.isAuthenticated()) {
+    res.render('secrets')
+  } else {
+    res.redirect('/login')
+  }
 })
 
 app.get('/submit', (req, res) => {
-    if (req.isAuthenticated()) {
-        res.render('submit')
-    } else {
-        res.redirect('/login')
-    }
+  if (req.isAuthenticated()) {
+    res.render('submit')
+  } else {
+    res.redirect('/login')
+  }
 })
 
-app.post('/submit', (req, res)=>{
-    const submittedSecret = req.body.secret;
-    User.findById(req.user.id, (err, user)=>{
-        if(err) console.log(err);
-        if(user){
-            
-        }
-    })
-    console.log(req.user);
+app.post('/submit', (req, res) => {
+  const submittedSecret = req.body.secret;
+  User.findById(req.user.id, (err, user) => {
+    if (err) console.log(err);
+    if (user) {
+
+    }
+  })
+  console.log(req.user);
 })
 
 app.post('/register', (req, res) => {
 
-    User.register({ username: req.body.username }, req.body.password, function (err, user) {
-        if (err) {
-            console.log(err)
-            res.redirect('/register')
-        } else {
-            passport.authenticate('local')(req, res, function () {
-                res.redirect('/secrets')
-            })
-        }
-    })
-    // const {username, password} = req.body
-    // bcrypt.hash(password, saltRounds, function(err, hash) {
-    //     // Store hash in your password DB.
-    //     const newUser = new User({email: username, password: hash})
-    //     newUser.save()
-    //     .then(()=>res.render('secrets'))
-    //     .catch(err =>console.log(err))
-    // });
+  User.register({ username: req.body.username }, req.body.password, function (err, user) {
+    if (err) {
+      console.log(err)
+      res.redirect('/register')
+    } else {
+      passport.authenticate('local')(req, res, function () {
+        res.redirect('/secrets')
+      })
+    }
+  })
+  // const {username, password} = req.body
+  // bcrypt.hash(password, saltRounds, function(err, hash) {
+  //     // Store hash in your password DB.
+  //     const newUser = new User({email: username, password: hash})
+  //     newUser.save()
+  //     .then(()=>res.render('secrets'))
+  //     .catch(err =>console.log(err))
+  // });
 })
 
 app.listen(process.env.PORT || 4000, () => {
-    console.log("server running on port 4000");
+  console.log("server running on port 4000");
 })
