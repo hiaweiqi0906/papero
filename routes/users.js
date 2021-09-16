@@ -317,10 +317,22 @@ router.post('/addFavourites&id=:bookId', (req, res) => {
 })
 
 router.post('/login', (req, res, next) => {
-    passport.authenticate('local')(req, res, () => {
-        res.cookie('keyboard cat.', { secure: true, signed: true, expires: new Date(Date.now() + 3600) });
-        res.sendStatus(200)
+    const user = new User({
+        email: req.body.email,
+        password: req.body.password
     })
+    req.login(user, (err) => {
+        if (err) console.log(err)
+        else {
+            passport.authenticate('local')(req, res, () => {
+                res.sendStatus(200)
+            })
+        }
+    })
+    // passport.authenticate('local')(req, res, () => {
+    //     // res.cookie('keyboard cat.', { secure: true, signed: true, expires: new Date(Date.now() + 3600) });
+    //     res.sendStatus(200)
+    // })
 })
 
 module.exports = router
