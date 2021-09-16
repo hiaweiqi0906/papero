@@ -407,17 +407,19 @@ app.get('/login', (req, res) => {
 })
 
 app.get('/isLoggedIn', (req, res)=>{
+  console.log(req.session)
     res.send(req.user)
 })
 
 app.post('/login', (req, res) => {
-    console.log(req.body)
+ 
     const user = new User({
         email: req.body.username,
         password: req.body.password
     })
 
         passport.authenticate('local')(req, res, () => {
+          console.log(req.session)
             res.send('ok')
             // res.redirect('/secrets')
         }) 
