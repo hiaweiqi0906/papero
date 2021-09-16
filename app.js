@@ -19,7 +19,7 @@ const cloudinary = require("./utils/cloudinary");
 const Article = require('./models/article')
 const Book = require('./models/Book')
 const nodemailer = require('nodemailer')
-const MongoStore = require('connect-mongo')
+// const MongoStore = require('connect-mongo')
 
 dotenv.config()
 
@@ -61,13 +61,13 @@ app.enable('trust proxy'); // add this line
 //session middleware
 app.use(session({
   secret: 'keyboard cat.',
-  resave: true,
+  resave: false,
   saveUninitialized: true,
   proxy: true, // add this line
   cookie: {
     secure: true,
     maxAge: 1000 * 60 * 60 * 24,
-    store: new MongoStore({ mongoUrl: db })
+    // store: new MongoStore({ mongoUrl: db })
     // store: MongoStore.create({ mongoUrl: db })
   }
 }))
