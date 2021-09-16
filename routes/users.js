@@ -66,7 +66,6 @@ router.get('/register', (req, res) => {
 })
 
 router.get('/checkIsLoggedIn', (req, res) => {
-    console.log(req)
     if (req.user) {
         res.json({ statusCode: '200', user: req.user })
     } else {
@@ -93,18 +92,14 @@ router.post('/changeAvatar', upload.single("image"), async (req, res) => {
             cloudinaryId: result?.public_id || user.cloudinaryId,
         };
         user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
+
+        console.log(req.body)
     } catch (err) {
         console.log(err);
     }
 })
 
 router.get('/retrieveInfo', (req, res) => {
-    const user = (req.user).toObject()
-    delete user['password']
-    res.json(user)
-})
-
-router.get('/retrieveOthersInfo/:email', (req, res) => {
     res.json(req.user)
 })
 
@@ -202,9 +197,86 @@ router.post('/register', (req, res) => {
 })
 
 router.post('/setting', (req, res) => {
+    console.log('here', req.body)
+    console.log(req.body)
+    // let errors = []
+    // const {
+    //     firstName,
+    //     lastName,
+    //     email,
+    //     gender,
+    //     noTel,
+    //     states,
+    //     location,
+    //     whatsappLink,
+    //     messengerLink,
+    //     wechatLink,
+    //     instagramLink } = req.body
+
+    // if (req.user.email != email) {
+    //     User.findOne({ email: email }, function (err, user) {
+    //         if (err) throw err
+    //         if (user) {
+    //             errors.push({ msg: 'User existed. Please try again' })
+    //             res.json({msg:'User Existed'})
+    //         }
+    //         else {
+    //             User.findOneAndUpdate({ email: req.user.email }, {
+    //                 firstName: firstName,
+    //                 lastName: lastName,
+    //                 email: email,
+    //                 gender: gender,
+    //                 noTel: noTel,
+    //                 states: states,
+    //                 location: location,
+    //                 whatsappLink: whatsappLink,
+    //                 messengerLink: messengerLink,
+    //                 wechatLink: wechatLink,
+    //                 instagramLink: instagramLink
+
+    //             }, (err, doc) => {
+    //                 if (err) throw err
+    //                 else {
+    //                     req.user.email = email
+    //                     console.log(req.user.email)
+    //                     res.json({msg:'Updated'})
+
+    //                 }
+    //             })
+
+    //         }
+    //     })
+    // } else if (req.user.email == email) {
+    //     User.findOneAndUpdate({ email: req.user.email }, {
+    //         firstName: firstName,
+    //         lastName: lastName,
+    //         gender: gender,
+    //         noTel: noTel,
+    //         states: states,
+    //         location: location,
+    //         whatsappLink: whatsappLink,
+    //         messengerLink: messengerLink,
+    //         wechatLink: wechatLink,
+    //         instagramLink: instagramLink
+    //         // ,
+    //         // avatarUri:{
+    //         //     type:String
+    //         // }
+    //     }, (err, doc) => {
+    //         if (err) throw err
+    //         else {
+    //             res.json({msg:'Updated'})
+    //         }
+    //     })
+
+
+    // }
+
+
 })
 
 router.post('/getsetting', (req, res) => {
+    console.log('haha', req.body)
     res.send(req.body)
 })
 
@@ -213,126 +285,54 @@ router.post('/changePassword', (req, res) => {
     const oldPassword = req.body.oldPassword
     const newPassword1 = req.body.newPassword1
 
-
-    //get old password from db
-    // let user = await User.findById(req.user._id);
-    //compare old password
-    bcrypt.compare(oldPassword, req.user.password, function (err, result) {
-        // if result==true
-        if (result) {
-            bcrypt.genSalt(10, function (err, salt) {
-                if (err) throw err
-
-                bcrypt.hash(newPassword1, salt, function (err, hash) {
+    
+        //get old password from db
+        // let user = await User.findById(req.user._id);
+        //compare old password
+        bcrypt.compare(oldPassword, req.user.password, function (err, result) {
+            // if result==true
+            if (result) {
+                bcrypt.genSalt(10, function (err, salt) {
                     if (err) throw err
 
-                    User.findOneAndUpdate({ email: req.user.email }, {
-                        password: hash
-                    }, (err, doc) => {
+                    bcrypt.hash(newPassword1, salt, function (err, hash) {
                         if (err) throw err
-                        else {
-                            req.user.password = hash
-                            res.send({ msg: 'Password Changed' })
-                        }
-                    })
+
+                        User.findOneAndUpdate({ email: req.user.email }, {
+                            password: hash
+                        }, (err, doc) => {
+                            if (err) throw err
+                            else {
+                                req.user.password = hash
+                                res.send({msg: 'Password Changed'})
+                            }
+                        })
+                    });
                 });
-            });
-        } else {
-            res.send({ msg: 'Password Incorrect' })
-        }
-    });
-})
+            } else {
+                res.send({msg: 'Password Incorrect'})
+            }
 
-router.get('/favourites&page=:page', (req, res) => {
-    if (!req.user) {
-
-    } else {
-        Book.find({ _id: { $in: req.user.favouriteUri } })
-            .skip((req.params.page - 1) * 10)
-            .limit(10)
-            .exec(function (err, docs) {
-                res.json(docs)
-            })
-    }
-})
+            // update in db
+            // else return error msg + redirect
+        });
+    
 
 
-router.get('/info&email=:email&page=:page', (req, res) => {
-    User.findOne({ email: (req.params.email.substring(1)) }, async function (err, user) {
-        if (err) throw (err);
-
-        Book.find({ uploadedBy: user.email })
-            .skip((req.params.page - 1) * 10)
-            .limit(10)
-            .exec(function (err, docs) {
-                res.json(docs)
-            })
-    })
-})
-
-router.get('/info&page=:page', (req, res) => {
-    if (!req.user) {
-
-    } else {
-        Book.find({ uploadedBy: req.user.email })
-            .skip((req.params.page - 1) * 10)
-            .limit(10)
-            .exec(function (err, docs) {
-                res.json(docs)
-            })
-    }
-})
-
-router.post('/removeFavourites&id=:bookId', (req, res) => {
-    if (req.user) {
-        let oldFavouriteList = req.user.favouriteUri
-        let result = oldFavouriteList.filter(item => item != req.params.bookId)
-        User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(req.user._id) }, { favouriteUri: result })
-            .then(() => {
-                req.user.favouriteUri = result
-                res.send({ msg: 'favourite list updated!' })
-            })
-            .catch(err => console.log(err))
-    } else {
-        res.send({ msg: 'user not logged in' })
-    }
-})
-
-router.post('/addFavourites&id=:bookId', (req, res) => {
-    if (req.user) {
-        let oldFavouriteList = req.user.favouriteUri
-
-        if (!(oldFavouriteList.includes(req.params.bookId))) {
-            oldFavouriteList.push(req.params.bookId)
-        }
-        User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(req.user._id) }, { favouriteUri: oldFavouriteList })
-            .then(() => {
-                req.user.favouriteUri = oldFavouriteList
-                res.send({ msg: 'favourite list updated!' })
-            })
-            .catch(err => console.log(err))
-    } else {
-        res.send({ msg: 'user not logged in' })
-    }
 })
 
 router.post('/login', (req, res, next) => {
-    const user = new User({
-        email: req.body.email,
-        password: req.body.password
+
+    // passport.authenticate('local', {
+    //     successRedirect: '/',
+    //     failureRedirect: '/users/login',
+    //     failureFlash: true
+    // })(req, res, next)
+
+    passport.authenticate('local')(req, res, () => {
+        res.cookie('keyboard cat.', { secure: true, signed: true, expires: new Date(Date.now() + 3600) });
+        res.sendStatus(200)
     })
-    req.login(user, (err) => {
-        if (err) console.log(err)
-        else {
-            passport.authenticate('local')(req, res, () => {
-                res.sendStatus(200)
-            })
-        }
-    })
-    // passport.authenticate('local')(req, res, () => {
-    //     // res.cookie('keyboard cat.', { secure: true, signed: true, expires: new Date(Date.now() + 3600) });
-    //     res.sendStatus(200)
-    // })
 })
 
 module.exports = router
