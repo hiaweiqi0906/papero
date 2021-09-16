@@ -24,7 +24,7 @@ dotenv.config()
 
 
 const app = express()
-app.enable('trust proxy'); // add this line
+
 app.use(express.json())
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use(cors({
@@ -56,7 +56,7 @@ app.set("view engine", "ejs");
 //body-parser
 app.use(express.urlencoded({ extended: true }))
 
-
+app.enable('trust proxy'); // add this line
 //session middleware
 app.use(session({
   secret: 'keyboard cat.',
