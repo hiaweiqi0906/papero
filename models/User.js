@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 require('mongoose-long')(mongoose);
 var Long = mongoose.Schema.Types.Long;
+const findOrCreate = require('mongoose-findorcreate')
+const passportLocalMongoose = require('passport-local-mongoose')
 
 const UserSchema = mongoose.Schema({
     
@@ -80,6 +82,10 @@ const UserSchema = mongoose.Schema({
             default: true
         }
 })
+// UserSchema.plugin(encrypt, {secret:process.env.SECRETS, encryptedFields: ['password']})
+UserSchema.plugin(passportLocalMongoose)
+UserSchema.plugin(findOrCreate);
 
-const User = mongoose.model('User', UserSchema);
+const User = new mongoose.model('User', UserSchema)
+
 module.exports = User
