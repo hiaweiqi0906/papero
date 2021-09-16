@@ -291,7 +291,7 @@ app.use(cors({
 }))
 
 app.enable('trust proxy'); // add this line
-app.set('trust proxy', 1) // trust first proxy
+// app.set('trust proxy', 1) // trust first proxy
 
 app.use(express.static('public'))
 app.set('view engine', 'ejs')
@@ -322,6 +322,7 @@ app.get('/printjwt', verify, (req, res) => {
 })
 app.use(cookieParser('MYCOOKIESECRET'));
 app.use(session({
+  // store: MongoStore.create({ mongoUrl: db }),
   secret: 'MYCOOKIESECRET',
   resave: true,
   saveUninitialized: true,
@@ -330,7 +331,7 @@ app.use(session({
     secure: true,
     maxAge: 1000 * 60 * 60 * 24,
     // store: new MongoStore({ mongoUrl: db })
-    // store: MongoStore.create({ mongoUrl: db })
+    
   }
 }))
 
