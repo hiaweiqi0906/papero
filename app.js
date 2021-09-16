@@ -294,8 +294,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(session({
     secret: 'keyboard cat.',
     secure: true,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
   proxy: true, // add this line
 
     cookie: {
