@@ -19,7 +19,7 @@ const cloudinary = require("./utils/cloudinary");
 const Article = require('./models/article')
 const Book = require('./models/Book')
 const nodemailer = require('nodemailer')
-
+const MongoStore = require('connect-mongo');
 dotenv.config()
 
 
@@ -63,7 +63,9 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24
+    maxAge: 1000 * 60 * 60 * 24,
+    // store: new MongoStore({ url: db }),
+    store: MongoStore.create({ mongoUrl: db })
   }
 }))
 
