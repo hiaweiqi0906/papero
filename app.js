@@ -24,6 +24,7 @@ dotenv.config()
 
 
 const app = express()
+app.enable('trust proxy'); // add this line
 app.use(express.json())
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use(cors({
