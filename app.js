@@ -283,18 +283,23 @@ app.use(cors({
     origin: "http://localhost:3000", // <-- location of the react app were connecting to
     credentials: true,
 }))
+app.enable('trust proxy'); // add this line
+app.set('trust proxy', 1) // trust first proxy
+
 app.use(express.static('public'))
 app.set('view engine', 'ejs')
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.set('trust proxy', 1) // trust first proxy
+// app.set('trust proxy', 1) // trust first proxy
 app.use(session({
     secret: 'keyboard cat.',
     secure: true,
     resave: false,
     saveUninitialized: false,
+  proxy: true, // add this line
+
     cookie: {
-        // secure: true,
+        secure: true,
         maxAge: 1000 * 60 * 60 * 24,
         // store: new MongoStore({ mongoUrl: db })
         // store: MongoStore.create({ mongoUrl: db })
