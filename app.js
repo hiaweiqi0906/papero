@@ -454,7 +454,7 @@ app.post('/login', (req, res) => {
     console.log(req.session)
     //create token
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET)
-    console.log('process.env.TOKEN_SECRET')
+    console.log('process.env.TOKEN_SECRET', process.env.TOKEN_SECRET)
     res.cookie("authToken", token, { secure: true, expires: new Date(Date.now() + 99999), httpOnly: true }); //signed: true, 
     res.header('authToken', token).send(token)
     // res.redirect('/secrets')
