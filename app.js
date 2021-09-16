@@ -61,9 +61,10 @@ app.enable('trust proxy'); // add this line
 //session middleware
 app.use(session({
   secret: 'keyboard cat.',
-  resave: false,
+  resave: true,
   saveUninitialized: true,
   cookie: {
+    secure: true,
     maxAge: 1000 * 60 * 60 * 24,
     // store: new MongoStore({ url: db }),
     // store: MongoStore.create({ mongoUrl: db })

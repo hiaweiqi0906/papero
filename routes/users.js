@@ -66,6 +66,7 @@ router.get('/register', (req, res) => {
 })
 
 router.get('/checkIsLoggedIn', (req, res) => {
+    console.log(req)
     if (req.user) {
         res.json({ statusCode: '200', user: req.user })
     } else {
