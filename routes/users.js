@@ -117,13 +117,14 @@ router.get('/retrieveInfo', (req, res) => {
         const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
         requestedUserId = verified._id;
         User.findById(requestedUserId)
-        .then(user => {
-            const cleanUser = user.toObject()
-            console.log(delete cleanUser.password)
-            console.log(cleanUser)
-            res.send(cleanUser)})
-        .catch(err => console.log(err))
-        
+            .then(user => {
+                const cleanUser = user.toObject()
+                console.log(delete cleanUser.password)
+                console.log(cleanUser)
+                res.send(cleanUser)
+            })
+            .catch(err => console.log(err))
+
     } catch (err) {
         res.sendStatus(400)
     }
@@ -308,41 +309,56 @@ router.post('/getsetting', (req, res) => {
 })
 
 router.post('/changePassword', (req, res) => {
-    //check 3 new fields entered?
-    const oldPassword = req.body.oldPassword
-    const newPassword1 = req.body.newPassword1
+    if (!req.headers.authorization) res.sendStatus(400)
+    try {
+        tokenString = req.headers.authorization.split(' ')
+        const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        requestedUserId = verified._id;
+        User.findById(requestedUserId)
+            .then(user => {
+                //check 3 new fields entered?
+                const oldPassword = req.body.oldPassword
+                const newPassword1 = req.body.newPassword1
 
 
-    //get old password from db
-    // let user = await User.findById(req.user._id);
-    //compare old password
-    bcrypt.compare(oldPassword, req.user.password, function (err, result) {
-        // if result==true
-        if (result) {
-            bcrypt.genSalt(10, function (err, salt) {
-                if (err) throw err
+                //get old password from db
+                // let user = await User.findById(req.user._id);
+                //compare old password
+                bcrypt.compare(oldPassword, user.password, function (err, result) {
+                    // if result==true
+                    if (result) {
+                        bcrypt.genSalt(10, function (err, salt) {
+                            if (err) throw err
 
-                bcrypt.hash(newPassword1, salt, function (err, hash) {
-                    if (err) throw err
+                            bcrypt.hash(newPassword1, salt, function (err, hash) {
+                                if (err) throw err
 
-                    User.findOneAndUpdate({ email: req.user.email }, {
-                        password: hash
-                    }, (err, doc) => {
-                        if (err) throw err
-                        else {
-                            req.user.password = hash
-                            res.send({ msg: 'Password Changed' })
-                        }
-                    })
+                                User.findOneAndUpdate({ email: user.email }, {
+                                    password: hash
+                                }, (err, doc) => {
+                                    if (err) throw err
+                                    else {
+                                        user.password = hash
+                                        res.send({ msg: 'Password Changed' })
+                                    }
+                                })
+                            });
+                        });
+                    } else {
+                        res.send({ msg: 'Password Incorrect' })
+                    }
+
+                    // update in db
+                    // else return error msg + redirect
                 });
-            });
-        } else {
-            res.send({ msg: 'Password Incorrect' })
-        }
+            })
+            .catch(err => console.log(err))
 
-        // update in db
-        // else return error msg + redirect
-    });
+    } catch (err) {
+        res.sendStatus(400)
+    }
+
+
 
 
 
@@ -375,6 +391,91 @@ router.post('/login', (req, res, next) => {
         // res.cookie('keyboard cat.', 'hahaha',{ httpOnly: true, secure: true, expires: new Date(Date.now() + 3600) });
         // res.sendStatus(200).json({authToken: token})
     })
+})
+
+router.get('/favourites&page=:page', (req, res) => {
+    if (!req.headers.authorization) res.sendStatus(400)
+    try {
+        tokenString = req.headers.authorization.split(' ')
+        const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        requestedUserId = verified._id;
+        User.findById(requestedUserId)
+            .then(user => {
+                Book.find({ _id: { $in: user.favouriteUri } })
+                    .skip((req.params.page - 1) * 10)
+                    .limit(10)
+                    .exec(function (err, docs) {
+                        console.log(docs)
+                        res.json(docs)
+                    })
+            })
+            .catch(err => console.log(err))
+
+    } catch (err) {
+        res.sendStatus(400)
+    }
+})
+
+router.post('/removeFavourites&id=:bookId', (req, res) => {
+    if (!req.headers.authorization) res.sendStatus(400)
+    try {
+        tokenString = req.headers.authorization.split(' ')
+        const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        requestedUserId = verified._id;
+        User.findById(requestedUserId)
+            .then(user => {
+                let oldFavouriteList = user.favouriteUri
+                let result = oldFavouriteList.filter(item => item != req.params.bookId)
+                User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(requestedUserId) }, { favouriteUri: result })
+                    .then((user) => {
+                        console.log('c', result)
+                        res.sendStatus(200)
+                    })
+                    .catch(err => console.log(err))
+            })
+            .catch(err => console.log(err))
+
+    } catch (err) {
+        res.sendStatus(400)
+    }
+
+})
+
+router.get('/info&email=:email&page=:page', (req, res) => {
+    User.findOne({ email: (req.params.email.substring(1)) }, async function (err, user) {
+        if (err) throw (err);
+        console.log(req.params.email)
+        Book.find({ uploadedBy: user.email })
+            .skip((req.params.page - 1) * 10)
+            .limit(10)
+            .exec(function (err, docs) {
+                res.json(docs)
+            })
+    })
+})
+
+router.get('/info&page=:page', (req, res) => {
+    if (!req.headers.authorization) res.sendStatus(400)
+    try {
+        tokenString = req.headers.authorization.split(' ')
+        const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        requestedUserId = verified._id;
+        User.findById(requestedUserId)
+            .then(user => {
+                Book.find({ uploadedBy: user.email })
+                    .skip((req.params.page - 1) * 10)
+                    .limit(10)
+                    .exec(function (err, docs) {
+                        console.log(docs)
+                        res.json(docs)
+                    })
+            })
+            .catch(err => console.log(err))
+
+    } catch (err) {
+        res.sendStatus(400)
+    }
+
 })
 
 module.exports = router

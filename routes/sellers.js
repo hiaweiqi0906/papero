@@ -93,14 +93,14 @@ router.get("/upload", ensureAuthenticated, (req, res) => {
 
 
 router.post('/test', upload.single("coverImg"), async (req, res) => {
-
+    // if (!req.headers.authorization) res.sendStatus(400)
     try {
-
-
-        // Upload image to cloudinary
+        // tokenString = req.headers.authorization.split(' ')
+        // const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        // requestedUserId = verified._id;
         let result;
         if (req.file) {
-            let user = await User.findById(req.user._id);
+            let user = await User.findOne({email: req.body.email});
             // Delete image from cloudinary
 
             if (user.cloudinaryID) {
@@ -112,113 +112,45 @@ router.post('/test', upload.single("coverImg"), async (req, res) => {
                 avatarUri: result?.secure_url || user.avatarUri,
                 cloudinaryID: result?.public_id || user.cloudinaryID,
             };
-            user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
+            user = await User.findOneAndUpdate({email: req.body.email}, data, { new: true });
         }
-
-        const {
-            firstName,
-            lastName,
-            email,
-            gender,
-            noTel,
-            states,
-            location,
-            whatsappLink,
-            messengerLink,
-            wechatLink,
-            instagramLink } = req.body
-
-        if (req.user.email != email) {
-            User.findOne({ email: email }, function (err, user) {
-                if (err) throw err
-                if (user) {
-                    res.json({ 'msg': 'User Existed' })
-                }
-                else {
-                    User.findOneAndUpdate({ email: req.user.email }, {
-                        firstName: firstName,
-                        lastName: lastName,
-                        email: email,
-                        gender: gender,
-                        noTel: noTel,
-                        states: states,
-                        location: location,
-                        whatsappLink: whatsappLink,
-                        messengerLink: messengerLink,
-                        wechatLink: wechatLink,
-                        instagramLink: instagramLink
-
-                    }, (err, doc) => {
-                        if (err) throw err
-                        else {
-                            req.user.email = email
-                            res.send({ msg: 'Updated' })
-
-                        }
-                    })
-                }
+        User.findOneAndUpdate({email: req.body.email}, {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            gender: req.body.gender,
+            noTel: req.body.noTel,
+            states: req.body.states,
+            location: req.body.location,
+            whatsappLink: req.body.whatsappLink,
+            messengerLink: req.body.messengerLink,
+            wechatLink: req.body.wechatLink,
+            instagramLink: req.body.instagramLink
+            // ,
+            // avatarUri:{
+            //     type:String
+            // }
+        }, (err, doc) => {
+            if (err) throw err
+            else {
+                console.log(doc)
+                res.send({ msg: 'Updated' })
+            }
+        })
+            .then(user => {
+                
             })
-        } else if (req.user.email == email) {
-            User.findOneAndUpdate({ email: req.user.email }, {
-                firstName: firstName,
-                lastName: lastName,
-                gender: gender,
-                noTel: noTel,
-                states: states,
-                location: location,
-                whatsappLink: whatsappLink,
-                messengerLink: messengerLink,
-                wechatLink: wechatLink,
-                instagramLink: instagramLink
-                // ,
-                // avatarUri:{
-                //     type:String
-                // }
-            }, (err, doc) => {
-                if (err) throw err
-                else {
-                    res.send({ msg: 'Updated' })
-                }
-            })
+            .catch(err => console.log(err))
 
-
-        }
-        //put photo uri to book instance
-        //put all info to books collection
-        //         const newBook = new Book({
-        //             bookTitle: req.body.title,
-        //             coverImgUri: coverImageUri,
-        //             imageUri: imgUri,
-        //             coverImgId: coverImageId,
-        //             imageId: imgID,
-        //             price: req.body.price,
-        //             description: req.body.description,
-        //             category: req.body.categories,
-        //             uploadedBy: req.user.email,
-        //             publishingCompany: '',
-        //             bookLanguage: req.body.language,
-        //             isbn: 0,
-        //             coverType: '',
-        //             year: req.body.year,
-        //             quantity: 1,
-        //             states: req.body.states,
-        //             location: req.body.location,
-        //             contactNumber: req.body.contactNumber,
-        //             whatsappLink: req.body.whatsappLink,
-        //             messengerLink: req.body.messengerLink,
-        //             wechatLink: req.body.wechatLink,
-        //             instagramLink: req.body.instagramLink,
-        //         })
-
-        //         console.log(newBook)
-        //         newBook.save()
-        //             .then(() => {
-        //                 res.send('ok')
-        //             })
-        //             .catch((err) => console.log(err))
     } catch (err) {
-        console.log(err);
+        console.log(err)
+        res.sendStatus(400)
     }
+            // Upload image to cloudinary
+
+
+        
+       
+ 
 })
 /**
  * route: /sellers/upload
@@ -377,6 +309,7 @@ router.post('/edit/:bookID', upload.fields([{ //upload pic to db
 }, {
     name: 'img3', maxCount: 1
 }]), async (req, res) => {
+    console.log(req.body)
     //check if 
     Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, async (err, book) => {
         
@@ -468,7 +401,7 @@ router.post('/edit/:bookID', upload.fields([{ //upload pic to db
                     price: req.body.price,
                     description: req.body.description,
                     category: req.body.category,
-                    uploadedBy: req.user.email,
+                    uploadedBy: req.body.email,
                     publishingCompany: '',
                     language: req.body.bookLanguage,
                     isbn: 0,
@@ -498,7 +431,7 @@ router.post('/edit/:bookID', upload.fields([{ //upload pic to db
                     price: req.body.price,
                     description: req.body.description,
                     category: req.body.category,
-                    uploadedBy: req.user.email,
+                    uploadedBy: req.body.uploadedBy,
                     publishingCompany: '',
                     language: req.body.bookLanguage,
                     isbn: 0,
@@ -517,6 +450,7 @@ router.post('/edit/:bookID', upload.fields([{ //upload pic to db
                         console.log(err)
                     }
                     else {
+                        console.log('okk', docs)
                         res.send({msg: 'Book Updated'})
                     }
                 });

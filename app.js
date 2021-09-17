@@ -24,7 +24,10 @@ dotenv.config()
 
 
 const app = express()
-app.use(express.json())
+// app.use(bodyParser.json())//{ limit: "50mb" }
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));//{limit: '50mb', , parameterLimit: 50000}
+
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use(cors({
   origin: "http://localhost:3000", // <-- location of the react app were connecting to
@@ -53,7 +56,6 @@ app.set("view engine", "ejs");
 
 
 //body-parser
-app.use(express.urlencoded({ extended: true }))
 
 
 //session middleware
