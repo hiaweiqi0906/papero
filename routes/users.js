@@ -5,7 +5,7 @@
 // const User = require('../models/User')
 // const upload = require('../utils/multer')
 // const cloudinary = require("../utils/cloudinary");
-
+const jwt = require('jsonwebtoken')
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
@@ -66,11 +66,22 @@ router.get('/register', (req, res) => {
 })
 
 router.get('/checkIsLoggedIn', (req, res) => {
-    if (req.user) {
-        res.json({ statusCode: '200', user: req.user })
-    } else {
-        res.send({ statusCode: '401' })
+
+    if (!req.headers.authorization) res.sendStatus(400)
+    try {
+        tokenString = req.headers.authorization.split(' ')
+        const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        req.user = verified;
+        res.sendStatus(200)
+    } catch (err) {
+        res.sendStatus(400)
     }
+
+    // if (req.user) {
+    //     res.json({ statusCode: '200', user: req.user })
+    // } else {
+    //     res.send({ statusCode: '401' })
+    // }
 })
 
 router.post('/changeAvatar', upload.single("image"), async (req, res) => {
@@ -100,7 +111,23 @@ router.post('/changeAvatar', upload.single("image"), async (req, res) => {
 })
 
 router.get('/retrieveInfo', (req, res) => {
-    res.json(req.user)
+    if (!req.headers.authorization) res.sendStatus(400)
+    try {
+        tokenString = req.headers.authorization.split(' ')
+        const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+        requestedUserId = verified._id;
+        User.findById(requestedUserId)
+        .then(user => {
+            const cleanUser = user.toObject()
+            console.log(delete cleanUser.password)
+            console.log(cleanUser)
+            res.send(cleanUser)})
+        .catch(err => console.log(err))
+        
+    } catch (err) {
+        res.sendStatus(400)
+    }
+    // res.json(req.user)
 })
 
 router.post('/register', (req, res) => {
@@ -285,41 +312,53 @@ router.post('/changePassword', (req, res) => {
     const oldPassword = req.body.oldPassword
     const newPassword1 = req.body.newPassword1
 
-    
-        //get old password from db
-        // let user = await User.findById(req.user._id);
-        //compare old password
-        bcrypt.compare(oldPassword, req.user.password, function (err, result) {
-            // if result==true
-            if (result) {
-                bcrypt.genSalt(10, function (err, salt) {
+
+    //get old password from db
+    // let user = await User.findById(req.user._id);
+    //compare old password
+    bcrypt.compare(oldPassword, req.user.password, function (err, result) {
+        // if result==true
+        if (result) {
+            bcrypt.genSalt(10, function (err, salt) {
+                if (err) throw err
+
+                bcrypt.hash(newPassword1, salt, function (err, hash) {
                     if (err) throw err
 
-                    bcrypt.hash(newPassword1, salt, function (err, hash) {
+                    User.findOneAndUpdate({ email: req.user.email }, {
+                        password: hash
+                    }, (err, doc) => {
                         if (err) throw err
-
-                        User.findOneAndUpdate({ email: req.user.email }, {
-                            password: hash
-                        }, (err, doc) => {
-                            if (err) throw err
-                            else {
-                                req.user.password = hash
-                                res.send({msg: 'Password Changed'})
-                            }
-                        })
-                    });
+                        else {
+                            req.user.password = hash
+                            res.send({ msg: 'Password Changed' })
+                        }
+                    })
                 });
-            } else {
-                res.send({msg: 'Password Incorrect'})
-            }
+            });
+        } else {
+            res.send({ msg: 'Password Incorrect' })
+        }
 
-            // update in db
-            // else return error msg + redirect
-        });
-    
+        // update in db
+        // else return error msg + redirect
+    });
+
 
 
 })
+
+function verify(req, res, next) {
+    const token = req.cookies.authToken
+    if (!token) return res.status(401).send('Access Denied')
+    try {
+        const verified = jwt.verify(token, process.env.TOKEN_SECRET)
+        req.user = verified;
+        next()
+    } catch (err) {
+        res.status(400).send('Invalid Token')
+    }
+}
 
 router.post('/login', (req, res, next) => {
 
@@ -330,8 +369,11 @@ router.post('/login', (req, res, next) => {
     // })(req, res, next)
 
     passport.authenticate('local')(req, res, () => {
-        res.cookie('keyboard cat.', { secure: true, signed: true, expires: new Date(Date.now() + 3600) });
-        res.sendStatus(200)
+        const token = jwt.sign({ _id: req.user._id, firstName: req.user.firstName, lastName: req.user.lastName }, process.env.TOKEN_SECRET)
+        res.cookie("authToken", token, { httpOnly: true, secure: true, sameSite: 'none', expires: new Date(Date.now() + 99999) }); //signed: true,, httpOnly: true  
+        res.send({ authToken: token })
+        // res.cookie('keyboard cat.', 'hahaha',{ httpOnly: true, secure: true, expires: new Date(Date.now() + 3600) });
+        // res.sendStatus(200).json({authToken: token})
     })
 })
 

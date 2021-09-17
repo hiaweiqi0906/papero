@@ -323,7 +323,7 @@ router.post('/upload', upload.fields([{ //upload pic to db
             price: req.body.price,
             description: req.body.description,
             category: req.body.categories,
-            uploadedBy: req.user.email,
+            uploadedBy: req.body.uploadedBy,
             publishingCompany: '',
             bookLanguage: req.body.language,
             isbn: 0,
