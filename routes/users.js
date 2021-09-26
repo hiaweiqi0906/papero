@@ -131,6 +131,25 @@ router.get('/retrieveInfo', (req, res) => {
     // res.json(req.user)
 })
 
+router.get('/retrieveOthersInfo/:email', (req, res) => {
+    
+    try {
+        
+        User.findOne({email: req.params.email})
+            .then(user => {
+                const cleanUser = user.toObject()
+                delete cleanUser.password
+                console.log('retrieved', cleanUser)
+                res.send(cleanUser)
+            })
+            .catch(err => console.log(err))
+
+    } catch (err) {
+        res.sendStatus(400)
+    }
+    // res.json(req.user)
+})
+
 router.post('/register', (req, res) => {
     User.findOne({
         email: req.body.email
@@ -417,6 +436,7 @@ router.get('/favourites&page=:page', (req, res) => {
 })
 
 router.post('/removeFavourites&id=:bookId', (req, res) => {
+    console.log('hereee')
     if (!req.headers.authorization) res.sendStatus(400)
     try {
         tokenString = req.headers.authorization.split(' ')
@@ -426,6 +446,7 @@ router.post('/removeFavourites&id=:bookId', (req, res) => {
             .then(user => {
                 let oldFavouriteList = user.favouriteUri
                 let result = oldFavouriteList.filter(item => item != req.params.bookId)
+                console.log('result: ', result)
                 User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(requestedUserId) }, { favouriteUri: result })
                     .then((user) => {
                         console.log('c', result)
@@ -439,6 +460,33 @@ router.post('/removeFavourites&id=:bookId', (req, res) => {
         res.sendStatus(400)
     }
 
+})
+
+router.get('/addFavourites&id=:bookId', (req, res) => {
+    if (!req.headers.authorization) res.sendStatus(400)
+    else {
+        try {
+            tokenString = req.headers.authorization.split(' ')
+            const verified = jwt.verify(tokenString[1], process.env.TOKEN_SECRET)
+            requestedUserId = verified._id;
+            User.findById(requestedUserId)
+                .then(user => {
+                    let oldFavouriteList = user.favouriteUri
+                    if (!(oldFavouriteList.includes(req.params.bookId)))
+                        oldFavouriteList.push(req.params.bookId)
+
+                    User.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(requestedUserId) }, { favouriteUri: oldFavouriteList })
+                        .then((user) => {
+                            res.sendStatus(200)
+                        })
+                    // .catch(err => console.log(err))
+                })
+            // .catch(err => console.log(err))
+
+        } catch (err) {
+            res.sendStatus(400)
+        }
+    }
 })
 
 router.get('/info&email=:email&page=:page', (req, res) => {

@@ -33,7 +33,7 @@ conn.once('open', () => {
 })
 
 router.get('/haha/:searchResults/:currentPage', async (req, res) => {
-  let skip = (req.params.currentPage - 1) * 10
+  let skip = (req.params.currentPage - 1) * 12
   let result = await conn.db.collection("books").aggregate([
     {
       '$search': {
@@ -49,7 +49,7 @@ router.get('/haha/:searchResults/:currentPage', async (req, res) => {
     }, {
       '$skip': skip
     }, {
-      '$limit': 10
+      '$limit': 12
     }
   ]).toArray()
 
@@ -57,23 +57,76 @@ router.get('/haha/:searchResults/:currentPage', async (req, res) => {
   res.send(result)
 })
 
-router.get('/trySearch', (req, res)=>{
+router.get('/trySearch', async (req, res) => {
+  var date = new Date();
+  var inputDate = (roundMinutes(date));//.toISOString()
+  const queryPrice={}
+  const query = {
+     'uploadedAt': { $lte: (inputDate) } 
+    // 'category': req.query.category,
+    // 'states': req.query.states,
+    // 'location': req.query.location,
+    // 'bookLanguage': req.query.bookLanguage,
+    // 'price': {'$and':[ {$lte: 1400}, {$gte: 10}]}
+    // 'price': {$lte: 1400, $gte: 100}
+    // $expr: {
+      // $and: [{
+      //   $gte: ["price", 10]
+      // }, {
+      //   $lte: ["price", 1400]
+      // }]
+    // }
+  }
+
+  if(req.query.category) query.category = req.query.category
+  if(req.query.states) query.states = req.query.states
+  if(req.query.location) query.location = req.query.location
+  if(req.query.bookLanguage) query.bookLanguage = req.query.bookLanguage
+  if(req.query.minPrice) queryPrice.$gte = Number(req.query.minPrice)
+  if(req.query.maxPrice) queryPrice.$lte = Number(req.query.maxPrice)
+  if(queryPrice!={}) query.price = queryPrice
+
+  console.log(query)
+  
+  let skip = (req.query.currentPage ? req.query.currentPage : 1 - 1) * 12
+  let result = await conn.db.collection("books").aggregate([
+    {
+      '$search': {
+        'index': 'book_index',
+        'text': {
+          'query': `${req.query.search}`,
+          'path': {
+            'wildcard': '*'
+          },
+        }
+      },
+    }, {
+      '$match': query
+    }, {
+      '$skip': skip
+    }, {
+      '$limit': 12
+    }
+  ]).toArray()
+
+  // result.limit(5)
+  res.send(result)
 })
 
 router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (req, res) => {
   // Book
   //   .find({$text: {$search: req.params.searchResults}})
   //   .sort({ uploadedAt: 'desc' })
-  //   .skip((req.params.currentPage - 1) * 10)
-  //   .limit(10)
+  //   .skip((req.params.currentPage - 1) * 12)
+  //   .limit(12)
   //   .exec(function (err, doc) {
   //     if(err) console.log(err)
   //     Book.find({$text: {$search: req.params.searchResults}}, (err, docs)=>{
-  //       let totalPages = (Math.ceil(docs.length/10))
+  //       let totalPages = (Math.ceil(docs.length/12))
   //       res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: doc, currentPage: req.params.currentPage, pages: totalPages });
   //     })      
   //   });    
-  let skip = (req.params.currentPage - 1) * 10
+  let skip = (req.params.currentPage - 1) * 12
   let result = await conn.db.collection("books").aggregate([
     {
       '$search': {
@@ -88,37 +141,16 @@ router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (
     }, {
       '$skip': skip
     }, {
-      '$limit': 10
+      '$limit': 12
     }
   ]).toArray()
 
   res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
 })
 
-// router.get('/search=:searchResults', async (req, res) => {
- 
-//   let skip = (req.params.currentPage - 1) * 10
-//   let result = await conn.db.collection("books").aggregate([
-//     {
-//       '$search': {
-//         'index': 'book_index',
-//         'text': {
-//           'query': `${req.params.searchResults}`,
-//           'path': {
-//             'wildcard': '*'
-//           }
-//         }
-//       },
-//     }
-//   ]).toArray()
-//   res.json(result)
-// // res.send(result)
-//   // res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
-// })
-
 router.get('/search=:searchResults&page=:page', async (req, res) => {
- 
-  let skip = (req.params.page - 1) * 10
+
+  let skip = (req.params.page - 1) * 12
   let result = await conn.db.collection("books").aggregate([
     {
       '$search': {
@@ -131,32 +163,30 @@ router.get('/search=:searchResults&page=:page', async (req, res) => {
         }
       }
     }, {
-        '$skip': skip
-      }, {
-        '$limit': 10
-      }
+      '$skip': skip
+    }, {
+      '$limit': 12
+    }
   ]).toArray()
   res.json(result)
-// res.send(result)
+  // res.send(result)
   // res.render("index/search_results", { user: req.user, searchResults: req.params.searchResults, books: result, currentPage: req.params.currentPage, pages: req.params.totalPages });
 })
 
-router.get('/allBooks&page=:page', (req, res)=>{
+router.get('/allBooks&page=:page', (req, res) => {
   Book
-        .find()
-        .sort({ uploadedAt: 'desc' })
-        .skip((req.params.page-1)*10)
-        .limit(10)   
-        .exec(function (err, doc) {
-            if (err) console.log(err)
-            res.json(doc)
-        })
-        
-        ;
+    .find()
+    .sort({ uploadedAt: 'desc' })
+    .skip((req.params.page - 1) * 12)
+    .limit(12)
+    .exec(function (err, doc) {
+      if (err) console.log(err)
+      res.json(doc)
+    })
 })
 
 router.post('/search', async (req, res) => {
-  let skip = (req.params.currentPage - 1) * 10
+  let skip = (req.params.currentPage - 1) * 12
   let result = await conn.db.collection("books").aggregate([
     {
       '$search': {
@@ -171,20 +201,113 @@ router.post('/search', async (req, res) => {
 
     }
   ]).toArray()
-  let newLink = '/search=' + req.body.searchbar + '/page=1/total=' + (Math.ceil(result.length / 10))
+  let newLink = '/search=' + req.body.searchbar + '/page=1/total=' + (Math.ceil(result.length / 12))
   res.redirect(newLink)
 })
+
+
+function roundMinutes(date) {
+
+  date.setHours(date.getHours() + Math.round(date.getMinutes() / 60));
+  date.setMinutes(0, 0, 0);
+
+  return date;
+}
 
 //store
 router.get('/', async (req, res) => {
   Book
     .find()
     .sort({ uploadedAt: 'desc' })
-    .skip((1 - 1) * 10)
-    .limit(10)
+    .skip((1 - 1) * 12)
+    .limit(12)
     .exec(function (err, doc) {
       if (err) console.log(err)
-      res.render("index/index", { user: req.user, books: doc, files: doc });
+      res.send(doc)
+      // res.render("index/index", { user: req.user, books: doc, files: doc });
+    });
+})
+
+//send 12 recent uploaded in before 1 hour
+router.get('/recentUpload', async (req, res) => {
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  console.log(typeof inputDate, inputDate)
+  Book
+    .find({ uploadedAt: { $lte: (inputDate) } })
+    .sort({ uploadedAt: 'desc' })
+    .limit(12)
+    .exec(function (err, doc) {
+      if (err) console.log(err)
+      res.send(doc)
+      // res.render("index/index", { user: req.user, books: doc, files: doc });
+    });
+})
+
+router.get('/recentUpload&page=:pageNumber', async (req, res) => {
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  console.log(typeof inputDate, inputDate)//
+  Book
+    .find({ 'uploadedAt': { $lte: inputDate } })
+    .sort({ uploadedAt: 'desc' })
+    .skip((req.params.pageNumber - 1) * 12)
+    .limit(12)
+    .exec(function (err, doc) {
+      if (err) console.log(err)
+      res.send(doc)
+      // res.render("index/index", { user: req.user, books: doc, files: doc });
+    });
+})
+
+//send 12 recent uploaded in before 1 hour
+router.get('/preferredBook', async (req, res) => {
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  console.log(typeof inputDate, inputDate)
+  Book
+    .find({ 'uploadedBy': '1111aaa@1111.com', uploadedAt: { $lte: (inputDate) } })
+    .sort({ uploadedAt: 'desc' })
+    .limit(6)
+    .exec(function (err, doc) {
+      if (err) console.log(err)
+      res.send(doc)
+      // res.render("index/index", { user: req.user, books: doc, files: doc });
+    });
+})
+
+router.get('/preferredBookAll&page=:pageNumber', async (req, res) => {
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  console.log(typeof inputDate, inputDate)
+  Book
+    .find({ 'uploadedBy': '1111aaa@1111.com', 'uploadedAt': { $lte: inputDate } })
+    .sort({ uploadedAt: 'desc' })
+    .skip((req.params.pageNumber - 1) * 12)
+    .limit(12)
+    .exec(function (err, doc) {
+      if (err) console.log(err)
+      res.send(doc)
+      // res.render("index/index", { user: req.user, books: doc, files: doc });
+    });
+})
+
+router.get('/ads-banner', (req, res) => {
+
+})
+
+router.get('/othersFromSeller-:email', async (req, res) => {
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  console.log(typeof inputDate, inputDate)
+  Book
+    .find({ 'uploadedBy': req.params.email })
+    .sort({ uploadedAt: 'desc' })
+    .limit(6)
+    .exec(function (err, doc) {
+      if (err) console.log(err)
+      res.send(doc)
+      // res.render("index/index", { user: req.user, books: doc, files: doc });
     });
 })
 
@@ -208,7 +331,7 @@ router.get('/view/:bookID', (req, res) => {
     if (err) console.log(err);
     //   res.render("index/info", { user: req.user, books: book, files: files });
     res.send(book)
-})
+  })
 })
 
 

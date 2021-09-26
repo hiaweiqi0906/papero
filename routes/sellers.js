@@ -401,7 +401,7 @@ router.post('/edit/:bookID', upload.fields([{ //upload pic to db
                     price: req.body.price,
                     description: req.body.description,
                     category: req.body.category,
-                    uploadedBy: req.body.email,
+                    uploadedBy: req.body.uploadedBy,
                     publishingCompany: '',
                     language: req.body.bookLanguage,
                     isbn: 0,
