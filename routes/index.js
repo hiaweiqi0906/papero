@@ -60,35 +60,25 @@ router.get('/haha/:searchResults/:currentPage', async (req, res) => {
 router.get('/trySearch', async (req, res) => {
   var date = new Date();
   var inputDate = (roundMinutes(date));//.toISOString()
-  const queryPrice={}
+  const queryPrice = {}
+  console.log(req.query)
   const query = {
-     'uploadedAt': { $lte: (inputDate) } 
-    // 'category': req.query.category,
-    // 'states': req.query.states,
-    // 'location': req.query.location,
-    // 'bookLanguage': req.query.bookLanguage,
-    // 'price': {'$and':[ {$lte: 1400}, {$gte: 10}]}
-    // 'price': {$lte: 1400, $gte: 100}
-    // $expr: {
-      // $and: [{
-      //   $gte: ["price", 10]
-      // }, {
-      //   $lte: ["price", 1400]
-      // }]
-    // }
+    'uploadedAt': { $lte: (inputDate) }
   }
 
-  if(req.query.category) query.category = req.query.category
-  if(req.query.states) query.states = req.query.states
-  if(req.query.location) query.location = req.query.location
-  if(req.query.bookLanguage) query.bookLanguage = req.query.bookLanguage
-  if(req.query.minPrice) queryPrice.$gte = Number(req.query.minPrice)
-  if(req.query.maxPrice) queryPrice.$lte = Number(req.query.maxPrice)
-  if(queryPrice!={}) query.price = queryPrice
+  if (req.query.category) query.category = req.query.category
+  if (req.query.states) query.states = req.query.states
+  if (req.query.location) query.location = req.query.location
+  if (req.query.bookLanguage) query.bookLanguage = req.query.bookLanguage
+  if (req.query.minPrice) {
+    queryPrice.$gte = Number(req.query.minPrice)
+  }
+  if (req.query.maxPrice) queryPrice.$lte = Number(req.query.maxPrice)
+  if (Object.keys(queryPrice).length != 0) query.price = queryPrice
 
   console.log(query)
-  
-  let skip = (req.query.currentPage ? req.query.currentPage : 1 - 1) * 12
+
+  let skip = ((req.query.page ? req.query.page : 1) - 1) * 12
   let result = await conn.db.collection("books").aggregate([
     {
       '$search': {
@@ -113,6 +103,128 @@ router.get('/trySearch', async (req, res) => {
   res.send(result)
 })
 
+router.get('/preferredBookSearch', async (req, res) => {
+  var date = new Date();
+  var inputDate = (roundMinutes(date));//.toISOString()
+  const queryPrice = {}
+  console.log('here preferred', req.query.search)
+  const query = {
+    'uploadedAt': { $lte: (inputDate) },
+    'uploadedBy': '1111aaa@1111.com'
+  }
+
+  if (req.query.category) query.category = req.query.category
+  if (req.query.states) query.states = req.query.states
+  if (req.query.location) query.location = req.query.location
+  if (req.query.bookLanguage) query.bookLanguage = req.query.bookLanguage
+  if (req.query.minPrice) {
+    queryPrice.$gte = Number(req.query.minPrice)
+  }
+  if (req.query.maxPrice) queryPrice.$lte = Number(req.query.maxPrice)
+  if (Object.keys(queryPrice).length != 0) query.price = queryPrice
+
+  console.log(query)
+
+  let skip = ((req.query.page ? req.query.page : 1) - 1) * 12
+let result = [];
+  if (req.query.search != undefined) {
+    console.log('here not empty')
+    result = await conn.db.collection("books").aggregate([
+      {
+        '$search': {
+          'index': 'book_index',
+          'text': {
+            'query': `${req.query.search}`,
+            'path': {
+              'wildcard': '*'
+            },
+          }
+        },
+      }, {
+        '$match': query
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': 12
+      }
+    ]).toArray()
+  } else {
+    result = await conn.db.collection("books").aggregate([
+      {
+        '$match': query
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': 12
+      }
+    ]).toArray()
+  }
+
+
+  // result.limit(5)
+  res.send(result)
+})
+
+router.get('/uploadedRecentlySearch', async (req, res) => {
+  var date = new Date();
+  var inputDate = (roundMinutes(date));//.toISOString()
+  const queryPrice = {}
+  console.log('here preferred', req.query.search)
+  const query = {
+    'uploadedAt': { $lte: (inputDate) },
+  }
+
+  if (req.query.category) query.category = req.query.category
+  if (req.query.states) query.states = req.query.states
+  if (req.query.location) query.location = req.query.location
+  if (req.query.bookLanguage) query.bookLanguage = req.query.bookLanguage
+  if (req.query.minPrice) {
+    queryPrice.$gte = Number(req.query.minPrice)
+  }
+  if (req.query.maxPrice) queryPrice.$lte = Number(req.query.maxPrice)
+  if (Object.keys(queryPrice).length != 0) query.price = queryPrice
+
+  console.log(query)
+
+  let skip = ((req.query.page ? req.query.page : 1) - 1) * 12
+let result = [];
+  if (req.query.search != undefined) {
+    console.log('here not empty')
+    result = await conn.db.collection("books").aggregate([
+      {
+        '$search': {
+          'index': 'book_index',
+          'text': {
+            'query': `${req.query.search}`,
+            'path': {
+              'wildcard': '*'
+            },
+          }
+        },
+      }, {
+        '$match': query
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': 12
+      }
+    ]).toArray()
+  } else {
+    result = await conn.db.collection("books").aggregate([
+      {
+        '$match': query
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': 12
+      }
+    ]).toArray()
+  }
+
+
+  // result.limit(5)
+  res.send(result)
+})
 router.get('/search=:searchResults/page=:currentPage/total=:totalPages', async (req, res) => {
   // Book
   //   .find({$text: {$search: req.params.searchResults}})
