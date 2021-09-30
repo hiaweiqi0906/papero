@@ -118,7 +118,7 @@ const BookSchema = mongoose.Schema({
     },
     instagramLink:{
         type: String,
-    }
+    },
 })
 
 BookSchema.index({bookTitle: 'text', description: 'text'});

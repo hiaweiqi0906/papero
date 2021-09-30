@@ -18,6 +18,7 @@ const cloudinary = require("../utils/cloudinary");
 const db = require('../config/keys').MongoURI;
 
 const Book = require('../models/Book')
+const Ads = require('../models/Ads')
 const User = require('../models/User')
 router.use(express.urlencoded({ extended: false }))
 router.use(bodyParser.json())
@@ -79,25 +80,38 @@ router.get('/trySearch', async (req, res) => {
   console.log(query)
 
   let skip = ((req.query.page ? req.query.page : 1) - 1) * 12
-  let result = await conn.db.collection("books").aggregate([
-    {
-      '$search': {
-        'index': 'book_index',
-        'text': {
-          'query': `${req.query.search}`,
-          'path': {
-            'wildcard': '*'
-          },
-        }
-      },
-    }, {
-      '$match': query
-    }, {
-      '$skip': skip
-    }, {
-      '$limit': 12
-    }
-  ]).toArray()
+  let result
+  if (req.query.search != '') {
+    result = await conn.db.collection("books").aggregate([
+      {
+        '$search': {
+          'index': 'book_index',
+          'text': {
+            'query': `${req.query.search}`,
+            'path': {
+              'wildcard': '*'
+            },
+          }
+        },
+      }, {
+        '$match': query
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': 12
+      }
+    ]).toArray()
+  } else {
+    result = await conn.db.collection("books").aggregate([{
+        '$match': query
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': 12
+      }
+    ]).toArray()
+  }
+
 
   // result.limit(5)
   res.send(result)
@@ -126,7 +140,7 @@ router.get('/preferredBookSearch', async (req, res) => {
   console.log(query)
 
   let skip = ((req.query.page ? req.query.page : 1) - 1) * 12
-let result = [];
+  let result = [];
   if (req.query.search != undefined) {
     console.log('here not empty')
     result = await conn.db.collection("books").aggregate([
@@ -187,7 +201,7 @@ router.get('/uploadedRecentlySearch', async (req, res) => {
   console.log(query)
 
   let skip = ((req.query.page ? req.query.page : 1) - 1) * 12
-let result = [];
+  let result = [];
   if (req.query.search != undefined) {
     console.log('here not empty')
     result = await conn.db.collection("books").aggregate([
@@ -391,7 +405,6 @@ router.get('/preferredBook', async (req, res) => {
 router.get('/preferredBookAll&page=:pageNumber', async (req, res) => {
   var date = new Date();
   var inputDate = roundMinutes(date).toISOString();
-  console.log(typeof inputDate, inputDate)
   Book
     .find({ 'uploadedBy': '1111aaa@1111.com', 'uploadedAt': { $lte: inputDate } })
     .sort({ uploadedAt: 'desc' })
@@ -409,11 +422,11 @@ router.get('/ads-banner', (req, res) => {
 })
 
 router.get('/othersFromSeller-:email', async (req, res) => {
+  console.log(req.params.email)
   var date = new Date();
   var inputDate = roundMinutes(date).toISOString();
-  console.log(typeof inputDate, inputDate)
   Book
-    .find({ 'uploadedBy': req.params.email })
+    .find({ uploadedBy: req.params.email })
     .sort({ uploadedAt: 'desc' })
     .limit(6)
     .exec(function (err, doc) {
@@ -441,8 +454,9 @@ router.get('/view/:bookID', (req, res) => {
   // })
   Book.findOne({ _id: new mongoose.Types.ObjectId(req.params.bookID) }, (err, book) => {
     if (err) console.log(err);
-    //   res.render("index/info", { user: req.user, books: book, files: files });
-    res.send(book)
+    User.findOne({ email: book.uploadedBy }, 'firstName lastName location states avatarUri', function (err, user) {
+      res.send({ book, user })
+    })
   })
 })
 
@@ -460,6 +474,39 @@ router.post('/view/:bookID', (req, res) => {
     .catch(err => console.log(err))
 
   res.redirect(`/view/${req.params.bookID}`)
+})
+
+router.get('/getBanner', (req, res)=>{
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  Ads.find({type: 'banner', expiredDate: {$gt: inputDate}}, (err, ads)=>{
+    if(err) console.log(err)
+    else{
+      res.send(ads)
+    }
+  })
+})
+
+router.get('/getHorizontalAds', (req, res)=>{
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  Ads.findOne({type: 'horizontal', expiredDate: {$gt: inputDate}}, (err, ads)=>{
+    if(err) console.log(err)
+    else{
+      res.send(ads)
+    }
+  })
+})
+
+router.get('/getVerticalAds', (req, res)=>{
+  var date = new Date();
+  var inputDate = roundMinutes(date).toISOString();
+  Ads.findOne({type: 'vertical', expiredDate: {$gt: inputDate}}, (err, ads)=>{
+    if(err) console.log(err)
+    else{
+      res.send(ads)
+    }
+  })
 })
 
 module.exports = router;

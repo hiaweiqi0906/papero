@@ -131,11 +131,11 @@ router.get('/retrieveInfo', (req, res) => {
     // res.json(req.user)
 })
 
-router.get('/retrieveOthersInfo/:email', (req, res) => {
+router.get('/retrieveOthersInfo/:id', (req, res) => {
     
     try {
         
-        User.findOne({email: req.params.email})
+        User.findById(req.params.id)
             .then(user => {
                 const cleanUser = user.toObject()
                 delete cleanUser.password
@@ -489,10 +489,10 @@ router.get('/addFavourites&id=:bookId', (req, res) => {
     }
 })
 
-router.get('/info&email=:email&page=:page', (req, res) => {
-    User.findOne({ email: (req.params.email.substring(1)) }, async function (err, user) {
+router.get('/info&id=:id&page=:page', (req, res) => {
+    console.log(req.params.id)
+    User.findById(req.params.id, async function (err, user) {
         if (err) throw (err);
-        console.log(req.params.email)
         Book.find({ uploadedBy: user.email })
             .skip((req.params.page - 1) * 10)
             .limit(10)
