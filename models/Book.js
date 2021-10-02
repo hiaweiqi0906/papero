@@ -84,7 +84,7 @@ const BookSchema = mongoose.Schema({
         // required: true,
     },
     isbn:{
-        type: Number,
+        type: String,
     },
     coverType:{
         type: String,
@@ -119,6 +119,10 @@ const BookSchema = mongoose.Schema({
     instagramLink:{
         type: String,
     },
+    typeOfBook:{
+        type: String,
+        default: 'Used',
+    }
 })
 
 BookSchema.index({bookTitle: 'text', description: 'text'});
