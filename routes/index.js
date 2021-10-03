@@ -6,7 +6,7 @@ const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
 const db = require('../config/keys').MongoURI;
 const Book = require('../models/Book')
-const Ads = require('../models/Ads')
+const Ads = require('../models/Ads') 
 const User = require('../models/User')
 const Report = require('../models/Report')
 router.use(express.urlencoded({ extended: false }))
@@ -372,7 +372,7 @@ router.get('/getHorizontalAds', (req, res)=>{
   var inputDate = roundMinutes(date).toISOString();
   Ads.findOne({type: 'Horizontal-ads', expiredDate: {$gt: inputDate}}, (err, ads)=>{
     if(err) console.log(err)
-    else{
+    else if(ads!=null){
       res.send({uri: ads.imgUri})
     }
   })
