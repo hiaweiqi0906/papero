@@ -15,7 +15,7 @@ const crypto = require('crypto')
 const User = require('../models/User')
 const Book = require('../models/Book')
 const nodemailer = require('nodemailer')
-const Token = require("../models/token");
+const Token = require("../models/Token");
 
 
 router.get('/logout', (req, res) => {
