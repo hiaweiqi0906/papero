@@ -25,7 +25,7 @@ app.use(cors({
 require('./config/passport')(require('passport'))
 
 //mongodb stuff
-const db = require('./config/keys').MongoURI;
+const db = process.env.MONGO_URI;
 const { connect, options } = require('./routes/index');
 const User = require('./models/User');
 

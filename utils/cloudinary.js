@@ -1,8 +1,11 @@
 const cloudinary = require('cloudinary').v2
+const dotenv = require('dotenv')
+
+dotenv.config()
 cloudinary.config({ 
-    cloud_name: 'papero', 
-    api_key: '116725562168465', 
-    api_secret: '-Y2arZ5dXUvc30KKji3GQemYjl4' 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.CLOUD_API_KEY, 
+    api_secret: process.env.CLOUD_API_SECRET
   });
   // exports.uploads = (file, folder) => {
   //   return new Promise(resolve => {

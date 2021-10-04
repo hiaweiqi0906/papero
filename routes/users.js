@@ -161,7 +161,7 @@ router.post('/resetPassword', async (req, res) => {
             }).save();
         }
 
-        const link = `http://localhost:3000/resetPassword/${user._id}/${token.token}`;
+        const link = `https://papero-frontend-ft0dq50fw-hiaweiqi0906.vercel.app/${user._id}/${token.token}`;
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -174,7 +174,7 @@ router.post('/resetPassword', async (req, res) => {
             from: 'papero2021malaysia@gmail.com',
             to: user.email,
             subject: 'Password Reset',
-            text: `${link}`
+            text: `This is your password reset link: ${link}`
             // html: '<h1>Hi Smartherd</h1><p>Your Messsage</p>'        
         };
 

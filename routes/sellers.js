@@ -1,10 +1,14 @@
+const dotenv = require('dotenv')
+
+dotenv.config()
+
 const express = require("express");
 const router = express.Router();
 const mongoose = require('mongoose')
 const Grid = require('gridfs-stream')
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
-const db = require('../config/keys').MongoURI;
+const db = process.env.MONGO_URI;
 const User = require('../models/User')
 const Book = require('../models/Book')
 const upload = require('../utils/multer')
